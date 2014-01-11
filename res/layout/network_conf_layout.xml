@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip" >
+
+        <TextView
+            android:id="@+id/hostnametextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="5dip"
+            android:text="WIFI SSID"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <Spinner
+            android:id="@+id/ssid_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip" >
+
+        <TextView
+            android:id="@+id/hostiptextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hosts"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="5dip"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+       <EditText
+           android:id="@+id/hosts_editText"
+           android:layout_width="0dip"
+           android:layout_height="wrap_content"
+           android:layout_gravity="right"
+           android:layout_weight="1"
+           android:ems="10"
+           android:hint="example 192.168.1.30" >
+
+        </EditText>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/ping_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip"
+        android:text="Ping" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/hosts_cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="cancel" />
+
+        <Button
+            android:id="@+id/hosts_save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="save" />
+
+    </LinearLayout>
+
+</LinearLayout>

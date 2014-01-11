@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <Preference android:key="uuid" /><Preference android:defaultValue="True" android:key="firstrun" /><PreferenceCategory android:title="Device">
+        <EditTextPreference android:key="device_name" android:title="Device Name" android:summary="Name of Device (optional)"/>
+        <Preference android:title="Notification Access" android:key="notification_access" android:summary="in order to get Notifications, you need to manually give this App the Permission to"/>
+        <Preference android:title="Generate Keys" android:summary="create new Encryption Keypair" android:key="generatekeys"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Network" android:key="net_cat">
+        <Preference android:title="Desktop Hosts" android:summary="manage your connected Desktops" android:key="desktophosts"/>
+</PreferenceCategory>
+    <PreferenceCategory android:title="Features">
+        <CheckBoxPreference android:title="Status Updates" android:summary="send Updates to Desktop" android:key="status_updates" android:defaultValue="False"/>
+        <EditTextPreference android:key="status_update_interval" android:title="Status Updates Interval" android:summary="when to update" android:numeric="integer" android:defaultValue="40" android:dialogMessage="Interval in Minutes"/><CheckBoxPreference android:title="Allow Control" android:summary="Desktop can control Device" android:key="allow_control" android:defaultValue="False"/>
+        
+        <EditTextPreference android:key="control_port" android:title="Control Port" android:summary="TCP Port to listen" android:defaultValue="9096"/>
+        
+        
+        
+        
+        
+        
+        
+        
+    </PreferenceCategory><PreferenceCategory android:title="Permissions"></PreferenceCategory><PreferenceScreen android:title="Read Permissions" android:summary="What Information to send"><Preference android:title="Notification Whitelist" android:key="notification_whitelist"/><CheckBoxPreference android:title="Send Volume" android:summary="current Volume Level" android:key="send_vol" android:defaultValue="True" /><CheckBoxPreference android:title="Send Battery" android:summary="current Battery Level" android:key="send_bat" android:defaultValue="True" /><CheckBoxPreference android:title="Send Messages" android:key="send_messages" android:summary="show SMS/MMS on Desktop" android:defaultValue="True" /><CheckBoxPreference android:title="Send Calls" android:key="send_calls" android:summary="incoming Calls" android:defaultValue="True" /><CheckBoxPreference android:title="Send Notifications" android:key="send_other_notifications" android:summary="show Notifications on Desktop" android:defaultValue="True" /><CheckBoxPreference android:title="Allow Compose Message" android:key="allow_compose_message" android:summary="send SMS/MMS from Desktop" android:defaultValue="True" />
+    
+    <CheckBoxPreference android:key="send_storage" android:summary="used Storage Space" android:title="Send Storage Info" android:defaultValue="True"/>
+    
+</PreferenceScreen><PreferenceCategory android:title="General">
+    <Preference android:summary="About this App" android:title="About" android:key="about"/>
+    <Preference android:summary="show last changes" android:title="Changelog" android:key="changelog"/>
+</PreferenceCategory>
+
+
+    
+    
+
+</PreferenceScreen>
