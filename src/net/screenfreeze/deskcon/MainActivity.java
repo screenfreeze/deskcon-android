@@ -165,7 +165,7 @@ public class MainActivity extends PreferenceActivity {
 						
 						if (state) {
 							// start update service
-							Log.d("Update Service: ", "start");				    	
+							Log.d("Update Service: ", "start");
 
 							int min = Integer.parseInt(sharedPrefs.getString("status_update_interval", "40"));
 							Calendar cal = Calendar.getInstance();
@@ -174,8 +174,9 @@ public class MainActivity extends PreferenceActivity {
 									secs*1000, statusUpdateServicePIntent);	
 						}
 						else {
-							// stop update service
-							alarmManager.cancel(statusUpdateServicePIntent);	
+							// stop update service							
+							alarmManager.cancel(statusUpdateServicePIntent);
+							Log.d("Update Service: ", "stop");	
 						}
 					}
 					// status_update_interval Preference

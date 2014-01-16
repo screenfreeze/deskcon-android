@@ -74,19 +74,6 @@ public class ControlService extends Service {
 		protected Void doInBackground(Void... params) {
 			Log.d("Control: ", "start Server");	
 			try {		
-//				// get ssl context
-//				SSLContext sslcontext = Connection.initSSLContext(getApplicationContext());
-//				
-//				// make secure Connection
-//			    SSLServerSocketFactory factory = (SSLServerSocketFactory) sslcontext.getServerSocketFactory();
-//			    sslServerSocket = (SSLServerSocket) factory.createServerSocket(PORT);
-//			    if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
-//			    	sslServerSocket.setEnabledProtocols(new String[] {"TLSv1","TLSv1.1","TLSv1.2"});
-//			    }
-//			    else {
-//			    	sslServerSocket.setEnabledProtocols(new String[] {"TLSv1"});
-//			    }
-//			    sslServerSocket.setReuseAddress(true);
 				// create SSLServerSocket
 				sslServerSocket = Connection.createSSLServerSocket(getApplicationContext(), PORT);
 			} catch (Exception e) {

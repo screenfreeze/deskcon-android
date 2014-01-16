@@ -1,5 +1,6 @@
 package net.screenfreeze.deskcon;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
@@ -112,18 +113,18 @@ public class StatusUpdateService extends Service {
 	
 	@SuppressLint("NewApi")
 	private void sendStatusUpdate() {
-			String jsonstr = getCurrentStatus();
-			Bundle data = new Bundle();
-			data.putString("commandtype", "STATS");
-			data.putString("message", jsonstr);
-			SendDataClient dataclient = new SendDataClient();
-			
-			//exe in parallel
-			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
-			    dataclient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, data);
-			} else {
-			    dataclient.execute(data);
-			}
+		String jsonstr = getCurrentStatus();
+		Bundle data = new Bundle();
+		data.putString("commandtype", "STATS");
+		data.putString("message", jsonstr);
+		SendDataClient dataclient = new SendDataClient();
+		
+		//exe in parallel
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+		    dataclient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, data);
+		} else {
+		    dataclient.execute(data);
+		}
 	}
 
 	// Building Protocol MSG
@@ -346,10 +347,11 @@ public class StatusUpdateService extends Service {
 			outToServer.write("C".getBytes());
 			
 			// negotiate new secure connection port
-			inFromServer.read(newportdata);
+			BufferedInputStream br = new BufferedInputStream(inFromServer);
+			br.read(newportdata);
 			clientSocket.close();
-			int newport =Integer.parseInt(new String(newportdata));
-			
+			int newport = Integer.parseInt(new String(newportdata));
+
 			// create SSl Connection
 			SSLSocket sslsocket = Connection.createSSLSocket(getApplicationContext(), host, newport);
 

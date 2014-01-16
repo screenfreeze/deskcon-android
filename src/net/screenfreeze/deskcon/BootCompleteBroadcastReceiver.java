@@ -22,6 +22,7 @@ public class BootCompleteBroadcastReceiver extends BroadcastReceiver{
 		int min = Integer.parseInt(sharedPrefs.getString("status_update_interval", "40"));
 		
 		if (update_service_enabled) {
+			Log.d("Boot: ", "start update service");
 			AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 			Intent i = new Intent(context, StatusUpdateService.class);		
 			PendingIntent pintent = PendingIntent.getService(context, 0, i, 0);
@@ -33,6 +34,6 @@ public class BootCompleteBroadcastReceiver extends BroadcastReceiver{
 			Intent j = new Intent(context,ControlService.class);
 			context.startService(j);
 		}
-		Log.d("Boot: ", "startup");	
+		Log.d("Boot: ", "startedup");	
 	}
 }

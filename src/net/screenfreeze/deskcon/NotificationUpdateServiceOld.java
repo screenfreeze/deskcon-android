@@ -36,7 +36,7 @@ public class NotificationUpdateServiceOld extends AccessibilityService {
 			if (send_other_notifications && whitelist.contains(packagename)) {
 				
 				String text =not.tickerText.toString();	
-				startUpdateServiceCommand(text);	
+				startUpdateServiceCommand(text);
 			}
 	    }
 	}

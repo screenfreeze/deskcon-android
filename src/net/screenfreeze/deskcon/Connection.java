@@ -81,6 +81,7 @@ public class Connection {
 		// make secure Connection
 	    SSLSocketFactory factory = (SSLSocketFactory) sslcontext.getSocketFactory();
 	    SSLSocket sslsocket = (SSLSocket) factory.createSocket(host, port);
+	    sslsocket.setUseClientMode(true);
 	    if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
 	    	sslsocket.setEnabledProtocols(new String[] {"TLSv1","TLSv1.1","TLSv1.2"});
 	    }
@@ -89,6 +90,7 @@ public class Connection {
 	    }
 
 	    Log.d("Connection: ", "using Protocol "+sslsocket.getSession().getProtocol());
+	    Log.d("Connection: ", "Session valid  "+sslsocket.getSession().isValid());
 		
 		return sslsocket;
 	}

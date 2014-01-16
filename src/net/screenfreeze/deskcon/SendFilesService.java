@@ -154,9 +154,10 @@ public class SendFilesService extends Service {
 			
 			// negotiate new secure connection port
 			byte[] newportdata = new byte[4];
-			inFromServer.read(newportdata);
+			BufferedInputStream br = new BufferedInputStream(inFromServer);
+			br.read(newportdata);
 			clientSocket.close();
-			int newport =Integer.parseInt(new String(newportdata));
+			int newport = Integer.parseInt(new String(newportdata));
 			
 //			// load the keystore
 //			InputStream keyStoreStream;

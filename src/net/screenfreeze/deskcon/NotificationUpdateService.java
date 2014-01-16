@@ -63,7 +63,8 @@ public class NotificationUpdateService extends NotificationListenerService{
 		Intent i = new Intent(getBaseContext(), StatusUpdateService.class);
 		i.putExtra("commandtype", "OTH_NOT");
 		i.putExtra("message", mess);
-
+		Log.d("Notification: ", "send text");
+		
 		startService(i);
 	}
 	
