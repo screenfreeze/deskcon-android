@@ -28,13 +28,13 @@ import android.widget.Toast;
 
 
 public class SendFilesService extends Service {
-	private static DataOutputStream outToServer;
-	private static DataInputStream inFromServer;
+	private DataOutputStream outToServer;
+	private DataInputStream inFromServer;
 	private static String UUID;
 	private static String PNAME;
-	private static String HOST;
-	private static int PORT;
-	private static SharedPreferences sharedPrefs;
+	private String HOST;
+	private int PORT;
+	private SharedPreferences sharedPrefs;
 	private static Toast ConnectionError;	
 	
 	@SuppressLint("ShowToast")

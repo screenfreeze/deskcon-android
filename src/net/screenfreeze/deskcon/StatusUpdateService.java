@@ -36,15 +36,15 @@ import android.provider.CallLog;
 import android.util.Log;
 
 public class StatusUpdateService extends Service {
-	private static Socket clientSocket;
-	private static DataOutputStream outToServer;
-	private static DataInputStream inFromServer;
+	private Socket clientSocket;
+	private DataOutputStream outToServer;
+	private DataInputStream inFromServer;
 	private static String UUID;
 	private static String PNAME;
-	private static String[] HOSTS;
-	private static int[] PORTS;
+	private String[] HOSTS;
+	private int[] PORTS;
 	private DesktopHostsDBHelper dbhelper;
-	private static SharedPreferences sharedPrefs;
+	private SharedPreferences sharedPrefs;
 	
 	@SuppressLint("ShowToast")
 	@Override
