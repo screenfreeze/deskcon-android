@@ -57,7 +57,8 @@
             android:label="Whitelist" >
         </activity>  
         
-        <service android:name=".StatusUpdateService" />
+        <service android:name=".StatusUpdateService"
+            android:priority="999" />
         <service android:name=".SendFilesService" />
         <service android:name=".ControlService" />
         <service android:name=".NotificationUpdateService"
