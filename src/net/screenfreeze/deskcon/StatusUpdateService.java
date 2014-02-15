@@ -33,6 +33,9 @@ import android.os.IBinder;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.CallLog;
+import android.telephony.PhoneStateListener;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class StatusUpdateService extends Service {
@@ -141,7 +144,7 @@ public class StatusUpdateService extends Service {
         
 		return jobject.toString();
 	}
-	
+		
 	//get current Stats
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
@@ -157,6 +160,19 @@ public class StatusUpdateService extends Service {
 		
 		//create json object to send
         JSONObject jobject = new JSONObject();
+        
+        PackageManager pm = getApplicationContext().getPackageManager();
+        boolean has_telephone = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        
+        // Signal Strength
+        if (true) {
+            TelephonyManager telephonyManager = ( TelephonyManager )getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+            AndroidPhoneStateListener phoneStateListener = new AndroidPhoneStateListener();
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+            int signalstrength = phoneStateListener.getSignalStrength();
+            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+            System.out.println("signal  "+signalstrength);
+        }
 		
 		// get control permissions
     	if (allow_control) {
@@ -167,9 +183,8 @@ public class StatusUpdateService extends Service {
 				e.printStackTrace();
 			}
     		
-    		//get sms capability
-    		PackageManager pm = getApplicationContext().getPackageManager();
-    		boolean can_message = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+    		//get sms capability    		
+    		boolean can_message = has_telephone;
     		
     		try {
 				jobject.put("canmessage", can_message && allow_compose_message);
@@ -304,7 +319,7 @@ public class StatusUpdateService extends Service {
 			type = data.getString("commandtype");
 			message = data.getString("message");
 			
-			if (type.equals("CLPBRD") || type.equals("URL")) {
+			if (type.equals("CLPBRD") || type.equals("URL") || type.equals("PING")) {
 				// send only to one Host
 				String HOST = data.getString("host");
 				int PORT = data.getInt("port");
@@ -361,6 +376,28 @@ public class StatusUpdateService extends Service {
 			out.write(data.getBytes());
 			sslsocket.close();
 	    }		
+	}
+	
+	public class AndroidPhoneStateListener extends PhoneStateListener {
+        public int signalStrengthValue;
+
+        @Override
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            super.onSignalStrengthsChanged(signalStrength);
+            if (signalStrength.isGsm()) {
+                if (signalStrength.getGsmSignalStrength() != 99)
+                    signalStrengthValue = signalStrength.getGsmSignalStrength() * 2 - 113;
+                else
+                    signalStrengthValue = signalStrength.getGsmSignalStrength();
+            } else {
+                signalStrengthValue = signalStrength.getCdmaDbm();
+            }
+            System.out.println("signal listener  "+signalStrengthValue);
+        }
+        
+        public int getSignalStrength() {
+        	return signalStrengthValue;
+        }
 	}
 	
 	@Override

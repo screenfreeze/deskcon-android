@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -203,23 +202,20 @@ public class ShareActivity extends Activity {
 			TextView iptv = (TextView) view.findViewById(R.id.hostiptextView);
 			TextView mactv = (TextView) view.findViewById(R.id.hostmactextView);
 			TextView wifitv = (TextView) view.findViewById(R.id.wifitextView);
-			ImageView deleteiv = (ImageView) view.findViewById(R.id.deletehostimageView);
 			final long id = cursor.getLong(0);
 			
 			nametv.setText(cursor.getString(1));
 			idtv.setText(String.valueOf(id));
 			iptv.setText(cursor.getString(2));
 			mactv.setText(cursor.getString(4));
-			wifitv.setText(cursor.getString(6));
-					
-			deleteiv.setEnabled(false);
+			wifitv.setText(cursor.getString(6));					
 		}
 		
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		    LayoutInflater inflater = LayoutInflater.from(context);
 
-		    View v = inflater.inflate(R.layout.host_list_row, parent, false);
+		    View v = inflater.inflate(R.layout.host_list_row_share, parent, false);
 		    
 			return v;
 		}    	

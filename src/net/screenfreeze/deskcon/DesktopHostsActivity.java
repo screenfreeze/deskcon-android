@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
@@ -21,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DesktopHostsActivity extends Activity {
 	private DesktopHostsDBHelper dbhelper;
@@ -77,6 +80,26 @@ public class DesktopHostsActivity extends Activity {
 				showEditHostDialog(id, ip, port, wifi);
 
 				return false;
+			}
+		});
+		hostslistview.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View parent, int pos,
+					long id) {
+				Cursor cursor = dbhelper.getHostByIdCursor(id);
+				String host = cursor.getString(2);
+				int port = cursor.getInt(3);
+				cursor.close();
+				Intent i = new Intent(getApplicationContext(), StatusUpdateService.class);
+	    		i.putExtra("commandtype", "PING");
+	    		i.putExtra("message", "");
+	    		i.putExtra("host", host);
+	    		i.putExtra("port", port);
+	    		startService(i);
+	    	    Toast pingmsg = Toast.makeText(getApplicationContext(), 
+	            		"send Ping", Toast.LENGTH_SHORT);
+	    	    pingmsg.show();
 			}
 		});
 	}
@@ -153,15 +176,19 @@ public class DesktopHostsActivity extends Activity {
 		final EditText ipedittext = (EditText) addhostView.findViewById(R.id.newipeditText);
 		final EditText portedittext = (EditText) addhostView.findViewById(R.id.newporteditText);
 		final CheckBox wifilockcheckbox = (CheckBox) addhostView.findViewById(R.id.wifilockcheckBox);
+		final String currentwifi;
 		ipedittext.setText(ip);
 		portedittext.setText(""+port);
+		
 		if (wifi.equals("")) {
 			wifilockcheckbox.setChecked(false);
-			wifilockcheckbox.setText("only on "+getWifiSSID());
+			currentwifi = getWifiSSID();
+			wifilockcheckbox.setText("only on "+currentwifi);
 		}
 		else {
 			wifilockcheckbox.setChecked(true);
-			wifilockcheckbox.setText("only on "+wifi);
+			currentwifi = wifi;
+			wifilockcheckbox.setText("only on "+currentwifi);
 		}		
 		
 		alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {			
@@ -169,10 +196,15 @@ public class DesktopHostsActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				String ip = ipedittext.getText().toString();
 				int port = Integer.parseInt(portedittext.getText().toString());	
-				String wifi = "";
-		        
-				// update DB
-				dbhelper.updateHost(id, ip, port, wifi);				
+				
+	        	if (wifilockcheckbox.isChecked()) {
+					// update DB
+					dbhelper.updateHost(id, ip, port, currentwifi);	
+	        	}
+	        	else {
+					// update DB
+					dbhelper.updateHost(id, ip, port, "");	
+	        	}    
 				
 	        	loadHostlist();
 				
