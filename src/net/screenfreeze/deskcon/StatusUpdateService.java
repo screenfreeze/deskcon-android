@@ -33,9 +33,6 @@ import android.os.IBinder;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.CallLog;
-import android.telephony.PhoneStateListener;
-import android.telephony.SignalStrength;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class StatusUpdateService extends Service {
@@ -163,17 +160,7 @@ public class StatusUpdateService extends Service {
         
         PackageManager pm = getApplicationContext().getPackageManager();
         boolean has_telephone = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-        
-        // Signal Strength
-        if (true) {
-            TelephonyManager telephonyManager = ( TelephonyManager )getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-            AndroidPhoneStateListener phoneStateListener = new AndroidPhoneStateListener();
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-            int signalstrength = phoneStateListener.getSignalStrength();
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
-            System.out.println("signal  "+signalstrength);
-        }
-		
+        	
 		// get control permissions
     	if (allow_control) {
     		int control_port = Integer.parseInt(sharedPrefs.getString("control_port", "9096"));
@@ -376,28 +363,6 @@ public class StatusUpdateService extends Service {
 			out.write(data.getBytes());
 			sslsocket.close();
 	    }		
-	}
-	
-	public class AndroidPhoneStateListener extends PhoneStateListener {
-        public int signalStrengthValue;
-
-        @Override
-        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-            super.onSignalStrengthsChanged(signalStrength);
-            if (signalStrength.isGsm()) {
-                if (signalStrength.getGsmSignalStrength() != 99)
-                    signalStrengthValue = signalStrength.getGsmSignalStrength() * 2 - 113;
-                else
-                    signalStrengthValue = signalStrength.getGsmSignalStrength();
-            } else {
-                signalStrengthValue = signalStrength.getCdmaDbm();
-            }
-            System.out.println("signal listener  "+signalStrengthValue);
-        }
-        
-        public int getSignalStrength() {
-        	return signalStrengthValue;
-        }
 	}
 	
 	@Override

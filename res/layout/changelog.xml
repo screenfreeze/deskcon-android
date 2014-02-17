@@ -20,7 +20,15 @@
                 android:id="@+id/changelogView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Release 0.1\n-Initial Release" />
+                android:text="Release 0.2\n
+							    added multi Filetransfer\n
+							    added License\n
+							    Priority 999 StatusUpdateService\n
+							    added Ping,fixed Wifilock\n
+							    small improvments\n
+							
+							\nRelease 0.1\n
+							    first commit" />
 
         </LinearLayout>
     </ScrollView>
