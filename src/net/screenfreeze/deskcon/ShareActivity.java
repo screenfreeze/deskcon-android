@@ -86,6 +86,9 @@ public class ShareActivity extends Activity {
 	            handleSendFile(intent); // Handle single file being sent
 	        }
 	    }
+    	else if (Intent.ACTION_SEND_MULTIPLE.equals(action) && type != null) {
+            handleSendMultipleFiles(intent); // Handle multiple images being sent            
+        }
 	    this.finish();
 	}
 			
@@ -120,25 +123,48 @@ public class ShareActivity extends Activity {
 	    if (fileUri != null) {
 	    	Log.d("FileUp: ", fileUri.toString());
 	    	String path = getRealPathFromURI(fileUri);
+	    	String[] filepaths = new String[1];
 	    	
 	    	if (path == null) {	            
 	            FileNotFoundError.show();
 	    		return;
 	    	}
-
+	    	
+	    	filepaths[0] = path;
+	    	
 			Intent i = new Intent(this, SendFilesService.class);
-			i.putExtra("filepath", path);
+			i.putExtra("filepaths", filepaths);
     		i.putExtra("host", HOST);
     		i.putExtra("port", PORT);
 			startService(i);
 	    }
 	}
 
-	@SuppressWarnings("unused")
-	private void handleSendMultipleImages(Intent intent) {
-	    ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-	    if (imageUris != null) {
-	        // Update UI to reflect multiple images being shared
+	private void handleSendMultipleFiles(Intent intent) {
+	    ArrayList<Uri> fileUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+	    Toast FileNotFoundError = Toast.makeText(getApplicationContext(), 
+        		"File not found", Toast.LENGTH_SHORT);
+	    
+	    if (fileUris != null) {
+	    	String[] filepaths = new String[fileUris.size()];
+	    	int i = 0;
+	    	for (Uri fileUri : fileUris) {
+	    		String path = getRealPathFromURI(fileUri);
+	    		Log.d("FileUp: ", fileUri.toString());
+	    		
+		    	if (path == null) {	            
+		            FileNotFoundError.show();
+		    		return;
+		    	}
+		    	filepaths[i]= path;
+	    		i++;
+	    	}
+	    	
+			Intent j = new Intent(this, SendFilesService.class);
+			j.putExtra("filepaths", filepaths);
+    		j.putExtra("host", HOST);
+    		j.putExtra("port", PORT);
+    		startService(j);
 	    }
 	}
 	

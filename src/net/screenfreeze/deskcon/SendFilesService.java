@@ -11,6 +11,7 @@ import java.net.Socket;
 
 import javax.net.ssl.SSLSocket;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,13 +83,13 @@ public class SendFilesService extends Service {
 	
 	private class SendFilesClient extends AsyncTask<Bundle, Void, Void> {
 		private String type;
-		private String message;
+		private String[] filepaths;
 
 		@Override
 		protected Void doInBackground(Bundle... params) {
 			Bundle data = params[0];
 			type = "FILE_UP";
-			message = data.getString("filepath");
+			filepaths = data.getStringArray("filepaths");
 			
 			try {
 				sendData();
@@ -101,13 +102,17 @@ public class SendFilesService extends Service {
 		}		
 		
 		// Building Protocol MSG
-		private String buildmsg(String type, String msgstr) {		
+		private String buildmsg(String type, String[] filenames) {		
 	        JSONObject jobject = new JSONObject();
+	        JSONArray jarray = new JSONArray();
+	        for (int i=0; i<filenames.length; i++){
+	        	jarray.put(filenames[i]);
+	        }
 	        try {
 				jobject.put("uuid", UUID);        
 				jobject.put("devicename", PNAME);
 		        jobject.put("type", type);
-		        jobject.put("data", msgstr);
+		        jobject.put("data", jarray.toString());
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}   
@@ -144,12 +149,18 @@ public class SendFilesService extends Service {
 
 			outToServer = new DataOutputStream(clientSocket.getOutputStream()); 
 	        inFromServer = new DataInputStream(clientSocket.getInputStream());
-			
-	        File myFile = new File (message);
-	        String msg = buildmsg(type, myFile.getName());
 	        
-			// send request
+	        // create Filehandler
+	        File[] files = new File[filepaths.length];
+	        String[] filenames = new String[filepaths.length];
+	        for (int i=0; i< files.length; i++) {
+	        	files[i] = new File(filepaths[i]);
+	        	filenames[i] = files[i].getName();
+	        }
 			
+	        String msg = buildmsg(type, filenames);        
+	        
+			// send request			
 			outToServer.write("C".getBytes());
 			
 			// negotiate new secure connection port
@@ -159,40 +170,6 @@ public class SendFilesService extends Service {
 			clientSocket.close();
 			int newport = Integer.parseInt(new String(newportdata));
 			
-//			// load the keystore
-//			InputStream keyStoreStream;
-//			try {
-//				keyStoreStream = openFileInput("devicekeystore.bks");
-//			} catch (FileNotFoundException e1) {
-//				return;
-//			}
-//			KeyStore MyKeyStore = KeyStore.getInstance("BKS");
-//			MyKeyStore.load(keyStoreStream, "android".toCharArray());
-//			Enumeration<String> aliases = MyKeyStore.aliases();
-//			while(aliases.hasMoreElements()) {
-//				System.out.println(aliases.nextElement());
-//			}
-//			
-//			// initialize trust manager factory with the read truststore
-//		    TrustManagerFactory trustManagerFactory = null;
-//		    trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-//			trustManagerFactory.init(MyKeyStore);
-//			TrustManager[] tm = trustManagerFactory.getTrustManagers();					    
-//			
-//			// init KeyManagerFactory
-//			KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-//			keyManagerFactory.init(MyKeyStore, "passwd".toCharArray());
-//			KeyManager[] km = keyManagerFactory.getKeyManagers();
-//			
-//			SSLContext sslcontext = SSLContext.getInstance("TLSv1.2");
-//			sslcontext.init(km, tm, new SecureRandom());
-//			
-//			// make secure Connection
-//		    SSLSocketFactory factory = (SSLSocketFactory) sslcontext.getSocketFactory();
-//		    SSLSocket sslsocket = (SSLSocket) factory.createSocket(HOST, newport);
-//		    sslsocket.setEnabledProtocols(new String[] {"TLSv1.2"});
-//
-//		    System.out.println(sslsocket.getSSLParameters().getProtocols()[0]);
 			
 			// create SSL Connection
 			SSLSocket sslsocket = Connection.createSSLSocket(getApplicationContext(), HOST, newport);
@@ -208,8 +185,10 @@ public class SendFilesService extends Service {
 			int return_code = in.read();
 	        
 	        // send a File
-	        if (return_code == 49) {		        	
-				sendFile(myFile, sslsocket);
+	        if (return_code == 49) {
+	        	for (File file : files) {
+	        		sendFile(file, sslsocket);
+	        	}				
 	        }						
 	    }		
 	}
