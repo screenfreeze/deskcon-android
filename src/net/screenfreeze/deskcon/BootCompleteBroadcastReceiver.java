@@ -17,10 +17,12 @@ public class BootCompleteBroadcastReceiver extends BroadcastReceiver{
 	public void onReceive(Context context, Intent arg1) {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		
+		boolean isfirstrun = sharedPrefs.getBoolean("firstrun", true);
 		boolean update_service_enabled = sharedPrefs.getBoolean("status_updates", false);
 		boolean control_service_enabled = sharedPrefs.getBoolean("allow_control", false);
 		int min = Integer.parseInt(sharedPrefs.getString("status_update_interval", "40"));
 		
+		if (isfirstrun) { return; } // exit, because Setup from user needs to run first
 		if (update_service_enabled) {
 			Log.d("Boot: ", "start update service");
 			AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

@@ -19,6 +19,8 @@ import org.spongycastle.jce.X509Principal;
 import org.spongycastle.x509.X509V3CertificateGenerator;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -62,7 +64,7 @@ public class MainActivity extends PreferenceActivity {
         sharedPrefsEditor = sharedPrefs.edit();
 		alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 		statusUpdateServiceIntent = new Intent(this, StatusUpdateService.class);
-		statusUpdateServicePIntent = PendingIntent.getService(this, 0, statusUpdateServiceIntent, 0);
+		statusUpdateServicePIntent = PendingIntent.getService(this, 0, statusUpdateServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		controlServiceIntent = new Intent(this, ControlService.class);
 		
         Preference desktophostsnewpref = findPreference("desktophosts");
@@ -147,8 +149,40 @@ public class MainActivity extends PreferenceActivity {
         
         // start at firstrun
         boolean isfirstrun = sharedPrefs.getBoolean("firstrun", true);
-        if (isfirstrun) { onFirstrun(); }
+        if (isfirstrun) { 
+        	onFirstrun(); 
+        }
+        else {
+        	initServices();
+        }
+    }
+    
+    private boolean isControlServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (ControlService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void initServices() {		
+    	if (sharedPrefs.getBoolean("allow_control", true)) {
+    		boolean cs_running = isControlServiceRunning();
+    		if (!cs_running) {
+    			startService(controlServiceIntent);
+    		}    		
+    	}
+    	if (sharedPrefs.getBoolean("status_updates", true)) {
+			Log.d("Update Service: ", "update Alarm");
 
+			int min = Integer.parseInt(sharedPrefs.getString("status_update_interval", "40"));
+			Calendar cal = Calendar.getInstance();
+			int secs = min * 60;
+			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 
+					secs*1000, statusUpdateServicePIntent);	
+    	}    	
     }
     
     // Actions if a Preference changes
@@ -185,6 +219,7 @@ public class MainActivity extends PreferenceActivity {
 						
 						// apply new interval
 						if (state) {
+							Log.d("Update Service: ", "restart");
 							alarmManager.cancel(statusUpdateServicePIntent);
 							// start update service
 							int min = Integer.parseInt(sharedPrefs.getString("status_update_interval", "40"));
@@ -387,6 +422,7 @@ public class MainActivity extends PreferenceActivity {
 		protected void onPostExecute(Void result) {
 			progress.dismiss();
 			Log.d("Cert Gen: ", "finished to generate");
+			initServices();
 			super.onPostExecute(result);
 		}
 

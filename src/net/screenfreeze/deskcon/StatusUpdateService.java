@@ -91,7 +91,10 @@ public class StatusUpdateService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		loadIdentifiers();
 		loadHosts();
-		if ( HOSTS.length == 0 ) {return super.onStartCommand(intent, flags, startId);}
+		if ( HOSTS.length == 0 ) {
+			stopSelf();
+			return super.onStartCommand(intent, flags, startId);
+		}
 		
 		Bundle extras = intent.getExtras();
 		
