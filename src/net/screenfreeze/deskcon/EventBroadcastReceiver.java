@@ -30,10 +30,14 @@ public class EventBroadcastReceiver extends BroadcastReceiver{
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		// permissions
 		boolean send_messages = sharedPrefs.getBoolean("send_messages", false);
-		boolean send_calls = sharedPrefs.getBoolean("send_calls", false);		
-      
+		boolean send_calls = sharedPrefs.getBoolean("send_calls", false);
+		
+		// Event Power status
+		if (extras == null) {
+			startStatusUpdateService(context);
+		}      
 		//Event is phonecall
-		if (extras.getString(TelephonyManager.EXTRA_STATE) != null) {
+		else if (extras.getString(TelephonyManager.EXTRA_STATE) != null) {
 			if (send_calls) handleCall(context, extras);
 		}      
 		// Event is SMS received
@@ -114,6 +118,7 @@ public class EventBroadcastReceiver extends BroadcastReceiver{
 	//start without infos, the Service will retrive current stats
 	private void startStatusUpdateService(Context context) {			
     	Intent i = new Intent(context, StatusUpdateService.class);
+    	i.putExtra("dummy", true); // jast to have Extras on Intent for now
     	context.startService(i);
 	}
 	

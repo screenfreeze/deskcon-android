@@ -56,6 +56,11 @@
                 <data android:mimeType="application/*" />
 		    </intent-filter>            
         </activity>
+        <activity android:name=".MediaWidgetConfigActivity">
+		    <intent-filter>
+		        <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+		    </intent-filter>
+		</activity>
         <activity
             android:name=".DesktopHostsActivity"
             android:label="Hosts" >
@@ -70,6 +75,7 @@
         <service android:name=".SendFilesService" />
         <service android:name=".ControlService" />
         <service android:name=".NotificationUpdateService"
+            android:priority="999"
             android:enabled="@bool/has18"
           	android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
 		     <intent-filter>
@@ -77,6 +83,7 @@
 		     </intent-filter>
 		</service>
 		<service android:name=".NotificationUpdateServiceOld"
+		    android:priority="999"
 		    android:enabled="@bool/pre18"
 		    android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
 		    <intent-filter>
@@ -86,12 +93,11 @@
 		     
         <receiver android:name=".EventBroadcastReceiver" >
             <intent-filter>
-                <action android:name="android.intent.action.POWER_DISCONNECTED" />
-                <action android:name="android.intent.action.POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.BATTERY_LOW" />
                 <action android:name="android.intent.action.BATTERY_OKAY" />
                 <action android:name="android.intent.action.PHONE_STATE" />
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
             <intent-filter android:priority="999" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
@@ -102,6 +108,15 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".MediaWidgetProvider"
+       		android:label="DeskCon Widget" >
+	        <intent-filter >
+	            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+	        </intent-filter>	
+	        <meta-data
+	           android:name="android.appwidget.provider"
+	           android:resource="@xml/mediawidgetinfo" />
+		</receiver> 
     </application>
 
 </manifest>
