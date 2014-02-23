@@ -309,7 +309,7 @@ public class StatusUpdateService extends Service {
 			type = data.getString("commandtype");
 			message = data.getString("message");
 			
-			if (type.equals("CLPBRD") || type.equals("URL") || type.equals("PING")) {
+			if (data.containsKey("host")) {
 				// send only to one Host
 				String HOST = data.getString("host");
 				int PORT = data.getInt("port");

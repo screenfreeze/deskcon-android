@@ -6,14 +6,14 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/widgethosttextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dip"
         android:text="Please compare these Fingerprints with the ones on your Desktop" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/widgetplayertextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="This Device Fingerprint:" />

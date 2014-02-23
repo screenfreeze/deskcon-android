@@ -4,7 +4,7 @@ DeskCon
 integrates your Android Device in the Desktop. Receive Notifications, Files
 and Commands from your mobile Device on your Desktop PC. The Data is send via a
 secure TLS Connection. The Connection is encrypted and authenticated with
-self-signed Certificates (RSA-2048 PK).
+self-signed Certificates (RSA-2048 PK). Also, the App is designed to be very Battery friendly.
 
 Warning: This Project is still in development (beta) and may contain some Bugs or
          Security Holes. If you find any, please report them ^^

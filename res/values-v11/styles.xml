@@ -7,5 +7,10 @@
     <style name="AppBaseTheme" parent="android:Theme.Holo">
         <!-- API 11 theme customizations can go here. -->
     </style>
+    
+    <!-- Widget theme. -->
+    <style name="WidgetButtonTheme" parent="android:style/Widget.Holo.ActionButton">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>  
 
 </resources>

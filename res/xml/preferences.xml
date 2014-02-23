@@ -9,8 +9,8 @@
         <Preference android:title="Desktop Hosts" android:summary="manage your connected Desktops" android:key="desktophosts"/>
 </PreferenceCategory>
     <PreferenceCategory android:title="Features">
-        <CheckBoxPreference android:title="Status Updates" android:summary="send Updates to Desktop" android:key="status_updates" android:defaultValue="False"/>
-        <EditTextPreference android:key="status_update_interval" android:title="Status Updates Interval" android:summary="when to update" android:numeric="integer" android:defaultValue="40" android:dialogMessage="Interval in Minutes"/><CheckBoxPreference android:title="Allow Control" android:summary="Desktop can control Device" android:key="allow_control" android:defaultValue="False"/>
+        <CheckBoxPreference android:title="Status Updates" android:summary="send Updates to Desktop" android:key="status_updates" android:defaultValue="True"/>
+        <EditTextPreference android:key="status_update_interval" android:title="Status Updates Interval" android:summary="when to update" android:numeric="integer" android:defaultValue="40" android:dialogMessage="Interval in Minutes"/><CheckBoxPreference android:title="Allow Control" android:summary="Desktop can control Device" android:key="allow_control" android:defaultValue="True"/>
         
         <EditTextPreference android:key="control_port" android:title="Control Port" android:summary="TCP Port to listen" android:defaultValue="9096"/>
         

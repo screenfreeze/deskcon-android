@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="playerarray">
+        <item>Default</item>
+        <item>Rhythmbox</item>
+        <item>Clementine</item>
+        <item>VLC</item>
+        <item>XMMS</item>
+        <item>Audacious</item>
+        <item>Banshee</item>
+        <item>Totem</item>
+        <item>Spotify</item>        
+    </string-array>
+    
+</resources>
