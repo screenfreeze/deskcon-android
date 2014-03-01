@@ -122,19 +122,23 @@ public class SendFilesService extends Service {
 		
 		// sendfile
 		@SuppressWarnings("resource")
-		private void sendFile(File f, SSLSocket sslsocket) throws Exception {		      
-		      byte [] mybytearray  = new byte [(int)f.length()];
+		private void sendFile(File f, SSLSocket sslsocket) throws Exception {	
+			  byte [] buffer = new byte [4096];
+			  long filesize = f.length();
 		      FileInputStream fis = new FileInputStream(f);		      
 		      BufferedInputStream bis = new BufferedInputStream(fis);
 		      OutputStream outputstream = sslsocket.getOutputStream();
 		      InputStream inputstream = sslsocket.getInputStream();
 		      // send file size
-		      outputstream.write(String.valueOf(mybytearray.length).getBytes());
+		      outputstream.write(String.valueOf(filesize).getBytes());
 		      // wait for ready
 		      inputstream.read();
-		      bis.read(mybytearray,0,mybytearray.length);		      
-		      outputstream.write(mybytearray,0,mybytearray.length);
-		      outputstream.flush();
+		      long cnt = Math.round(filesize / 4096)+1;
+		      for (long i=0; i < cnt; i++) {    		  
+		    	  int bytesread = bis.read(buffer, 0, 4096);
+		    	  outputstream.write(buffer, 0 ,bytesread);
+			      outputstream.flush();
+		      }
 		}		
 		
 		private void sendData() throws Exception {			
