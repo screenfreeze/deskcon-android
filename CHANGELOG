@@ -1,3 +1,8 @@
+Release 0.2.1
+    added Mediaplayer Widget
+    fixed Powerstate Listener
+    fixed Startup Issues
+
 Release 0.2
     added multi Filetransfer
     added License
