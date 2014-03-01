@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import javax.net.ssl.SSLSocket;
@@ -30,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.CallLog;
@@ -98,7 +100,7 @@ public class StatusUpdateService extends Service {
 		
 		Bundle extras = intent.getExtras();
 		
-		if (!extras.containsKey("commandtype")) {
+		if (extras == null || !extras.containsKey("commandtype")) {
 			sendStatusUpdate();
 		}
 		else {
@@ -309,6 +311,10 @@ public class StatusUpdateService extends Service {
 			type = data.getString("commandtype");
 			message = data.getString("message");
 			
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Status Update WL");
+			wl.acquire();			
+			
 			if (data.containsKey("host")) {
 				// send only to one Host
 				String HOST = data.getString("host");
@@ -331,6 +337,8 @@ public class StatusUpdateService extends Service {
 				}
 			}
 			
+			wl.release();
+			
 			stopSelf();
 			
 			return null;
@@ -338,7 +346,9 @@ public class StatusUpdateService extends Service {
 		
 		private void sendData(String host, int port) throws Exception {
 			try {
-				clientSocket = new Socket(host, port);
+				InetSocketAddress ad = new InetSocketAddress(host, port);
+				clientSocket = new Socket();
+				clientSocket.connect(ad, 500);
 			} catch (Exception e) {
 				Log.d("Connection: ", "could not connect");
 				return;
