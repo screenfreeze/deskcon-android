@@ -4,7 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -17,13 +18,17 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -36,7 +41,8 @@ public class SendFilesService extends Service {
 	private String HOST;
 	private int PORT;
 	private SharedPreferences sharedPrefs;
-	private static Toast ConnectionError;	
+	private static Toast ConnectionError;
+	public static Context context;
 	
 	@SuppressLint("ShowToast")
 	@Override
@@ -64,6 +70,7 @@ public class SendFilesService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Bundle extras = intent.getExtras();
+		context = this;
 		
 		HOST = extras.getString("host");
 		PORT = extras.getInt("port");
@@ -121,19 +128,21 @@ public class SendFilesService extends Service {
 		}
 		
 		// sendfile
-		@SuppressWarnings("resource")
-		private void sendFile(File f, SSLSocket sslsocket) throws Exception {	
+		private void sendFile(Uri f, SSLSocket sslsocket) throws Exception {
 			  byte [] buffer = new byte [4096];
-			  long filesize = f.length();
-		      FileInputStream fis = new FileInputStream(f);		      
-		      BufferedInputStream bis = new BufferedInputStream(fis);
+			  long filesize = getFileSize(f);
+			  
+			  InputStream is = getContentResolver().openInputStream(f);	      
+		      BufferedInputStream bis = new BufferedInputStream(is);
 		      OutputStream outputstream = sslsocket.getOutputStream();
 		      InputStream inputstream = sslsocket.getInputStream();
+		      
 		      // send file size
 		      outputstream.write(String.valueOf(filesize).getBytes());
 		      // wait for ready
 		      inputstream.read();
 		      long cnt = Math.round(filesize / 4096)+1;
+		      
 		      for (long i=0; i < cnt; i++) {    		  
 		    	  int bytesread = bis.read(buffer, 0, 4096);
 		    	  outputstream.write(buffer, 0 ,bytesread);
@@ -155,18 +164,23 @@ public class SendFilesService extends Service {
 	        inFromServer = new DataInputStream(clientSocket.getInputStream());
 	        
 	        // create Filehandler
-	        File[] files = new File[filepaths.length];
+	        Uri[] fileUris = new Uri[filepaths.length];
 	        String[] filenames = new String[filepaths.length];
-	        for (int i=0; i< files.length; i++) {
-	        	files[i] = new File(filepaths[i]);
-	        	filenames[i] = files[i].getName();
+
+	        for (int i=0; i< fileUris.length; i++) {
+	        	if (filepaths[i].startsWith("content://com.google.android.gallery3d.provider/picasa/")){	        		
+	        		fileUris[i] = cachePicasaFile(Uri.parse(filepaths[i])); // Picasa workaround
+	        	}
+	        	else {
+	        		fileUris[i] = Uri.parse(filepaths[i]);
+	        	}	        	
+	        	filenames[i] = getFileName(fileUris[i]);
 	        }
 			
-	        String msg = buildmsg(type, filenames);        
-	        
+	        String msg = buildmsg(type, filenames);
+
 			// send request			
 			outToServer.write("C".getBytes());
-			
 			// negotiate new secure connection port
 			byte[] newportdata = new byte[4];
 			BufferedInputStream br = new BufferedInputStream(inFromServer);
@@ -174,10 +188,8 @@ public class SendFilesService extends Service {
 			clientSocket.close();
 			int newport = Integer.parseInt(new String(newportdata));
 			
-			
 			// create SSL Connection
 			SSLSocket sslsocket = Connection.createSSLSocket(getApplicationContext(), HOST, newport);
-			
 		    // write data
 			OutputStream out = sslsocket.getOutputStream();
 			DataInputStream in = new DataInputStream(sslsocket.getInputStream());
@@ -190,13 +202,84 @@ public class SendFilesService extends Service {
 	        
 	        // send a File
 	        if (return_code == 49) {
-	        	for (File file : files) {
+	        	for (int j=0; j<fileUris.length ;j++) {
+	        		Uri file = fileUris[j];
 	        		sendFile(file, sslsocket);
 	        	}				
 	        }						
 	    }		
 	}
 	
+	// Workaround ,because of a Google Bug!
+	private Uri cachePicasaFile(Uri contentUri) throws IOException {
+		String fname = getFileName(contentUri);
+	    File cDir = getBaseContext().getCacheDir();               
+	    File tempFile = new File(cDir.getPath() + "/" + fname) ;
+	    
+		InputStream is = getContentResolver().openInputStream(contentUri);	      
+	    BufferedInputStream bis = new BufferedInputStream(is);
+	    FileOutputStream fos = new FileOutputStream(tempFile);
+	    long filesize = getFileSize(contentUri);
+	    
+	    byte[] buffer = new byte[4096];
+	    
+	    long cnt = Math.round(filesize / 4096)+1;
+	    for (long i=0; i < cnt; i++) {    		  
+	    	  int bytesread = bis.read(buffer, 0, 4096);
+	    	  fos.write(buffer, 0 ,bytesread);
+		      fos.flush();
+	    }
+	    fos.close();
+	      
+	    Uri uri = Uri.fromFile(tempFile);
+		return uri;		
+	}
+	
+	private long getFileSize(Uri contentUri) {
+        if (contentUri.getScheme().equals("file")) {
+        	File f = new File(contentUri.getPath());
+        	return f.length();
+        }
+        else {
+        	String [] proj={MediaStore.Images.Media.SIZE};
+	        Cursor cursor = getBaseContext().getContentResolver().query( contentUri,
+                    proj, // Which columns to return
+                    null,       // WHERE clause; which rows to return (all rows)
+                    null,       // WHERE clause selection arguments (none)
+                    null); // Order-by clause (ascending by name)
+
+	        cursor.moveToFirst();
+
+	        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+	        long size = cursor.getLong(column_index);
+	        
+	        cursor.close();
+	        
+	        return size;
+        }
+	}
+	
+	private String getFileName(Uri contentUri) {
+        if (contentUri.getScheme().equals("file")) {
+        	return contentUri.getLastPathSegment();
+        }
+        else {
+        	String [] proj={MediaStore.Images.Media.DISPLAY_NAME};
+	        Cursor cursor = getBaseContext().getContentResolver().query( contentUri,
+                    proj, // Which columns to return
+                    null,       // WHERE clause; which rows to return (all rows)
+                    null,       // WHERE clause selection arguments (none)
+                    null); // Order-by clause (ascending by name)
+
+	        cursor.moveToFirst();
+
+	        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+	        String name = cursor.getString(column_index);
+	        cursor.close();
+	        
+	        return name;
+        }
+	}	
 	
 	@Override
 	public IBinder onBind(Intent arg0) {

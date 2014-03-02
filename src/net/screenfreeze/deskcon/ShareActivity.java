@@ -117,20 +117,12 @@ public class ShareActivity extends Activity {
 
 	private void handleSendFile(Intent intent) {
 	    Uri fileUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-	    Toast FileNotFoundError = Toast.makeText(getApplicationContext(), 
-	            		"File not found", Toast.LENGTH_SHORT);
-	    
+	        
 	    if (fileUri != null) {
 	    	Log.d("FileUp: ", fileUri.toString());
-	    	String path = getRealPathFromURI(fileUri);
 	    	String[] filepaths = new String[1];
 	    	
-	    	if (path == null) {	            
-	            FileNotFoundError.show();
-	    		return;
-	    	}
-	    	
-	    	filepaths[0] = path;
+	    	filepaths[0] = fileUri.toString();
 	    	
 			Intent i = new Intent(this, SendFilesService.class);
 			i.putExtra("filepaths", filepaths);
@@ -149,14 +141,14 @@ public class ShareActivity extends Activity {
 	    	String[] filepaths = new String[fileUris.size()];
 	    	int i = 0;
 	    	for (Uri fileUri : fileUris) {
-	    		String path = getRealPathFromURI(fileUri);
+	    		String uristring = fileUri.toString();
 	    		Log.d("FileUp: ", fileUri.toString());
 	    		
-		    	if (path == null) {	            
+		    	if (uristring == null) {	            
 		            FileNotFoundError.show();
 		    		return;
 		    	}
-		    	filepaths[i]= path;
+		    	filepaths[i] = uristring;
 	    		i++;
 	    	}
 	    	
