@@ -7,18 +7,23 @@ import java.io.InputStreamReader;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSocket;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -110,22 +115,22 @@ public class ControlService extends Service {
 	        String datastring = new String(data);
 			socket.getOutputStream().write("OK".getBytes());			
 			
+			Log.d("Control: ", "received CMD");
+			
 			// parse CMD Data
 			JSONObject jobject = new JSONObject(datastring);
+			//Long uuid = jobject.getLong("uuid");
+			String name = jobject.getString("name");
 			String cmdtype = jobject.getString("type");
 			String cmddata = jobject.getString("data");
 			
 			// SMS
 			if (cmdtype.equals("sms")) {
-				JSONObject smsjobject = new JSONObject(cmddata);
-            	String number = smsjobject.getString("number");
-            	String message = smsjobject.getString("message");
-            	SmsManager smsManager = SmsManager.getDefault();
-            	
-				smsManager.sendTextMessage(number, null, message, null, null);
-				storeSMS(number,message);
-				
-				SMSToastMessage.show();				
+				sendSMS(cmddata);
+			}
+			// PING
+			else if (cmdtype.equals("ping")) {
+				playPing(name);
 			}
 		}
 		
@@ -136,22 +141,52 @@ public class ControlService extends Service {
 			} catch (IOException e) {}
 		}
 
-		//stores sent sms in sent folder
-		public boolean storeSMS(String number, String message) {
-		    boolean ret = false;
-		    try {
-		        ContentValues values = new ContentValues();
-		        values.put("address", number);
-		        values.put("body", message);
-		        values.put("read", true);
 
-		        getContentResolver().insert(Uri.parse("content://sms/sent"), values);
-		        ret = true;
-		    } catch (Exception ex) {
-		        ret = false;
-		    }
-		    return ret;
-		}
+	}
+	
+	//stores sent sms in sent folder
+	public boolean storeSMS(String number, String message) {
+	    boolean ret = false;
+	    try {
+	        ContentValues values = new ContentValues();
+	        values.put("address", number);
+	        values.put("body", message);
+	        values.put("read", true);
+
+	        getContentResolver().insert(Uri.parse("content://sms/sent"), values);
+	        ret = true;
+	    } catch (Exception ex) {
+	        ret = false;
+	    }
+	    return ret;
+	}
+	
+	public void sendSMS(String data) throws JSONException {
+		JSONObject smsjobject = new JSONObject(data);
+    	String number = smsjobject.getString("number");
+    	String message = smsjobject.getString("message");
+    	SmsManager smsManager = SmsManager.getDefault();
+    	
+		smsManager.sendTextMessage(number, null, message, null, null);
+		storeSMS(number,message);
+		
+		SMSToastMessage.show();		
+	}
+	
+	// play default ringtone with Notification
+	public void playPing(String data) {
+		Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+		NotificationCompat.Builder mBuilder =
+		        new NotificationCompat.Builder(this)
+		        .setSmallIcon(R.drawable.connector_launcher)
+		        .setContentTitle("Ping!")
+		        .setContentText("from "+data)
+		        .setSound(ringtone);
+		
+		NotificationManager notificationManager =
+			    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+		notificationManager.notify(555, mBuilder.build());
 	}
 	
     public byte[] convertChartoByteArray(char[] chars) {
