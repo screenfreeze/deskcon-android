@@ -291,7 +291,15 @@ public class StatusUpdateService extends Service {
 				e.printStackTrace();
 			}
     	}
-
+    	
+    	//get Wifi strength
+    	int wifistrength = getWifiStrength();
+        try {
+			jobject.put("wifistrength", wifistrength);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}    	
+    	
 		return jobject.toString();
 	}
 	
@@ -305,6 +313,7 @@ public class StatusUpdateService extends Service {
 		private String type;
 		private String message;
 
+		@SuppressLint("Wakelock")
 		@Override
 		protected Void doInBackground(Bundle... params) {
 			Bundle data = params[0];
@@ -395,4 +404,18 @@ public class StatusUpdateService extends Service {
         if (ssid == null) {ssid = "";}
         return ssid;    	
     }
+    
+    private int getWifiStrength() {
+        try {
+      	   WifiManager wifiManager = (WifiManager) getApplicationContext()
+           		.getSystemService(Context.WIFI_SERVICE);
+            int rssi = wifiManager.getConnectionInfo().getRssi();
+            int level = WifiManager.calculateSignalLevel(rssi, 10);
+            int percentage = (int) ((level/10.0)*100);
+            return percentage;
+        }
+        catch (Exception e) {
+           return -1;
+        }
+	}        
 }
