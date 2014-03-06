@@ -1,12 +1,17 @@
 package net.screenfreeze.deskcon;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSocket;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,6 +26,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -71,7 +77,7 @@ public class ControlService extends Service {
 		return START_STICKY;
 	}	
 	
-	private class ControlServer extends AsyncTask<Void, Void, Void> {
+	private class ControlServer extends AsyncTask<Void, Integer, Void> {
 		private SSLServerSocket sslServerSocket;
 		private SSLSocket socket;
 
@@ -106,14 +112,13 @@ public class ControlService extends Service {
 			return null;
 		}
 		
-		private void handleClientSocket(SSLSocket socket) throws Exception {
-			BufferedReader inFromClient;			
-			inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));	        
-
+		private void handleClientSocket(SSLSocket socket) throws Exception {		
+			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));	        
+			DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream()); 
 			// receive Data
 	        byte[] data = readWithMaxBuffer(inFromClient);
 	        String datastring = new String(data);
-			socket.getOutputStream().write("OK".getBytes());			
+			outToClient.write("OK".getBytes());			
 			
 			Log.d("Control: ", "received CMD");
 			
@@ -132,6 +137,17 @@ public class ControlService extends Service {
 			else if (cmdtype.equals("ping")) {
 				playPing(name);
 			}
+			// FILEUP
+			else if (cmdtype.equals("fileup")) {
+				Log.d("Control: ", "File Transfer");
+				JSONArray jarray = new JSONArray(cmddata);
+				String[] filenames = new String[jarray.length()];
+				for (int i=0; i<jarray.length(); i++) {
+					filenames[i] = jarray.getString(i);
+				}
+				receiveFiles(filenames, socket);
+				publishProgress(1);				
+			}
 		}
 		
 		// force server stop
@@ -139,6 +155,17 @@ public class ControlService extends Service {
 			try {
 				sslServerSocket.close();
 			} catch (IOException e) {}
+		}
+
+
+		protected void onProgressUpdate(Integer...state) {
+			if (state[0] == 1) {
+				Toast finishedToast = Toast.makeText(getBaseContext(), 
+						"received File(s)", Toast.LENGTH_LONG);
+				finishedToast.show();
+			}
+			
+			super.onProgressUpdate(state);
 		}
 
 
@@ -187,6 +214,42 @@ public class ControlService extends Service {
 			    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 		notificationManager.notify(555, mBuilder.build());
+	}
+	
+	private void receiveFiles(String[] filenames, SSLSocket socket) throws IOException {
+		DataInputStream dataInFromClient = new DataInputStream(socket.getInputStream());
+		BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+		
+		File downloadfolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+		
+		for (int i=0; i<filenames.length; i++) {
+			String filename = filenames[i];
+
+			// receive Filesize
+			String ins = inFromClient.readLine();
+			long filesize = Long.parseLong(ins);
+			
+			byte[] buffer = new byte[4096];
+			int loopcnt = Math.round(filesize/4096);
+			int lastbytes = (int) (filesize % 4096);
+
+			// open File
+			File newFile = new File(downloadfolder, filename);
+			FileOutputStream fos = new FileOutputStream(newFile);
+			
+			// send ready
+			outToClient.write(1);
+			// send Data
+			for (int j=0; j<loopcnt; j++) {
+				dataInFromClient.read(buffer, 0, 4096);
+				fos.write(buffer, 0, 4096);
+			}
+			dataInFromClient.read(buffer, 0, lastbytes);
+			fos.write(buffer, 0, lastbytes);
+			fos.flush();
+			fos.close();						
+		}
 	}
 	
     public byte[] convertChartoByteArray(char[] chars) {
