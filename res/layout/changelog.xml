@@ -20,7 +20,14 @@
                 android:id="@+id/changelogView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Release 0.2.1\n
+                android:text="Release 0.2.5\n
+							    added Connection Timeout and Wakelock\n
+							    fixed large Filetransfer\n
+							    fixed Picasa Images*\n
+							    added Ping Notification\n
+							    added File upload to Device\n
+							    
+                			\nRelease 0.2.1\n
 							    added Mediaplayer Widget\n
 							    fixed Powerstate Listener\n
 							    fixed Startup Issues\n

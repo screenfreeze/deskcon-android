@@ -1,3 +1,10 @@
+Release 0.2.5
+    added Connection Timeout and Wakelock
+    fixed large Filetransfer
+    fixed Picasa Images*
+    added Ping Notification
+    added File upload to Device
+    
 Release 0.2.1
     added Mediaplayer Widget
     fixed Powerstate Listener
