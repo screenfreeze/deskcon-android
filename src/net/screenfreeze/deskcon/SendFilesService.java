@@ -2,13 +2,11 @@ package net.screenfreeze.deskcon;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 
 import javax.net.ssl.SSLSocket;
 
@@ -34,8 +32,6 @@ import android.widget.Toast;
 
 
 public class SendFilesService extends Service {
-	private DataOutputStream outToServer;
-	private DataInputStream inFromServer;
 	private static String UUID;
 	private static String PNAME;
 	private String HOST;
@@ -151,18 +147,6 @@ public class SendFilesService extends Service {
 		}		
 		
 		private void sendData() throws Exception {			
-			Socket clientSocket;
-			try {
-				clientSocket = new Socket(HOST, PORT);
-			} catch (Exception e) {
-				Log.d("Connection: ", "could not connect");
-				ConnectionError.show();
-				return;
-			}						
-
-			outToServer = new DataOutputStream(clientSocket.getOutputStream()); 
-	        inFromServer = new DataInputStream(clientSocket.getInputStream());
-	        
 	        // create Filehandler
 	        Uri[] fileUris = new Uri[filepaths.length];
 	        String[] filenames = new String[filepaths.length];
@@ -177,19 +161,18 @@ public class SendFilesService extends Service {
 	        	filenames[i] = getFileName(fileUris[i]);
 	        }
 			
-	        String msg = buildmsg(type, filenames);
+	        String msg = buildmsg(type, filenames);	        
+	        
+			SSLSocket sslsocket;
+			try {
+				// create SSL Connection
+				sslsocket = Connection.createSSLSocket(getApplicationContext(), HOST, PORT);
+			} catch (Exception e) {
+				Log.d("Connection: ", "could not connect");
+				ConnectionError.show();
+				return;
+			}
 
-			// send request			
-			outToServer.write("C".getBytes());
-			// negotiate new secure connection port
-			byte[] newportdata = new byte[4];
-			BufferedInputStream br = new BufferedInputStream(inFromServer);
-			br.read(newportdata);
-			clientSocket.close();
-			int newport = Integer.parseInt(new String(newportdata));
-			
-			// create SSL Connection
-			SSLSocket sslsocket = Connection.createSSLSocket(getApplicationContext(), HOST, newport);
 		    // write data
 			OutputStream out = sslsocket.getOutputStream();
 			DataInputStream in = new DataInputStream(sslsocket.getInputStream());

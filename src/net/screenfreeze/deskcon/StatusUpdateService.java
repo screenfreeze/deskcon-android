@@ -1,13 +1,7 @@
 package net.screenfreeze.deskcon;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-
-import javax.net.ssl.SSLSocket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,9 +32,6 @@ import android.provider.CallLog;
 import android.util.Log;
 
 public class StatusUpdateService extends Service {
-	private Socket clientSocket;
-	private DataOutputStream outToServer;
-	private DataInputStream inFromServer;
 	private static String UUID;
 	private static String PNAME;
 	private String[] HOSTS;
@@ -354,32 +345,16 @@ public class StatusUpdateService extends Service {
 		}		
 		
 		private void sendData(String host, int port) throws Exception {
+			Socket sslsocket = null;
 			try {
-				InetSocketAddress ad = new InetSocketAddress(host, port);
-				clientSocket = new Socket();
-				clientSocket.connect(ad, 500);
+				// create SSl Connection
+				sslsocket = Connection.createSSLSocket(getApplicationContext(), host, port);
 			} catch (Exception e) {
 				Log.d("Connection: ", "could not connect");
 				return;
 			}
-			
-			outToServer = new DataOutputStream(clientSocket.getOutputStream()); 
-			inFromServer = new DataInputStream(clientSocket.getInputStream());
-			
-			// send request
-			byte[] newportdata = new byte[4];
-			outToServer.write("C".getBytes());
-			
-			// negotiate new secure connection port
-			BufferedInputStream br = new BufferedInputStream(inFromServer);
-			br.read(newportdata);
-			clientSocket.close();
-			int newport = Integer.parseInt(new String(newportdata));
-
-			// create SSl Connection
-			SSLSocket sslsocket = Connection.createSSLSocket(getApplicationContext(), host, newport);
-
-		    // write data
+		    
+			// write data
 			OutputStream out = sslsocket.getOutputStream();
 			String data = buildmsg(type, message);
 			out.write(data.getBytes());

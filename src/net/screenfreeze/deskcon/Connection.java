@@ -3,6 +3,7 @@ package net.screenfreeze.deskcon;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -80,8 +81,10 @@ public class Connection {
 		
 		// make secure Connection
 	    SSLSocketFactory factory = (SSLSocketFactory) sslcontext.getSocketFactory();
-	    SSLSocket sslsocket = (SSLSocket) factory.createSocket(host, port);
+	    SSLSocket sslsocket = (SSLSocket) factory.createSocket();
 	    sslsocket.setUseClientMode(true);
+	    sslsocket.connect(new InetSocketAddress(host, port), 500);
+	    
 	    if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
 	    	sslsocket.setEnabledProtocols(new String[] {"TLSv1","TLSv1.1","TLSv1.2"});
 	    }

@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -116,6 +114,7 @@ public class AuthenticationManager {
         X509Certificate ServerCert;
         String Host;
         int Port;
+        int SecPort;
         String Wifi;
         String MacAddress;
         String MyFp;
@@ -146,17 +145,7 @@ public class AuthenticationManager {
 				catch (Exception e) {
 					ConnectionError.show();
 					return false;
-				}
-				
-				// get Hardware Address
-				InetAddress address = clientSocket.getInetAddress();
-				if (address != null) {
-					NetworkInterface ni = NetworkInterface.getByInetAddress(address);
-					if (ni != null) {						
-						MacAddress = new String(ni.getHardwareAddress());
-					}					
-					else {MacAddress = "";}			
-				}			
+				}					
 				
 				// load the keystore
 				MyKeyStore = KeyStore.getInstance("BKS");
@@ -195,12 +184,13 @@ public class AuthenticationManager {
 		        if (ServerUUID.equals("mykeypair")) {return false;}
 		        
 		        String ack = inFromServer.readLine();
+		        SecPort = Integer.parseInt(ack);  // Server send his Secure Port if he accepts, 0 otherwise
 		        
 		        while (!validated) {
 		        	Thread.sleep(1000); // wait for users choice
 		        }
 		        
-		        if (ack.equals("OK") && isValid) {
+		        if (SecPort > 0 && isValid) {
 		        	// successfully paired
 		        	outToServer.write("OK".getBytes());
 		        	return true;
@@ -259,7 +249,7 @@ public class AuthenticationManager {
 					e.printStackTrace();
 				}
 
-				dbhelper.addHost(Long.parseLong(ServerUUID), ServerName, Host, Port, Wifi, MacAddress, ServerFp);
+				dbhelper.addHost(Long.parseLong(ServerUUID), ServerName, Host, SecPort, Wifi, MacAddress, ServerFp);
 				onpaircallback.onPairingCompleted();				
 			}
 			else {
