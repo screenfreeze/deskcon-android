@@ -20,7 +20,11 @@
                 android:id="@+id/changelogView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Release 0.2.5\n
+                android:text="Release 0.2.7\n
+    							changed Connection making, pairing\n
+    							removed MAC Label\n
+    							
+                			\nRelease 0.2.5\n
 							    added Connection Timeout and Wakelock\n
 							    fixed large Filetransfer\n
 							    fixed Picasa Images*\n

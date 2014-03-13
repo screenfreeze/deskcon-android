@@ -1,3 +1,7 @@
+Release 0.2.7
+    changed Connection making, pairing
+    removed MAC Label
+
 Release 0.2.5
     added Connection Timeout and Wakelock
     fixed large Filetransfer
