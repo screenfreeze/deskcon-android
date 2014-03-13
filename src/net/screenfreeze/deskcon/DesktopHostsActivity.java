@@ -249,7 +249,6 @@ public class DesktopHostsActivity extends Activity {
 			TextView idtv = (TextView) view.findViewById(R.id.hostidtextView);
 			TextView nametv = (TextView) view.findViewById(R.id.hostnametextView);
 			TextView iptv = (TextView) view.findViewById(R.id.hostiptextView);
-			TextView mactv = (TextView) view.findViewById(R.id.hostmactextView);
 			TextView wifitv = (TextView) view.findViewById(R.id.wifitextView);
 			ImageView deleteiv = (ImageView) view.findViewById(R.id.deletehostimageView);
 			final long id = cursor.getLong(0);
@@ -257,7 +256,6 @@ public class DesktopHostsActivity extends Activity {
 			nametv.setText(cursor.getString(1));
 			idtv.setText(String.valueOf(id));
 			iptv.setText(cursor.getString(2));
-			mactv.setText(cursor.getString(4));
 			wifitv.setText(cursor.getString(6));
 					
 			deleteiv.setOnClickListener(new OnClickListener() {
