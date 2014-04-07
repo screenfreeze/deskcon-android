@@ -27,16 +27,18 @@ public class NotificationUpdateServiceOld extends AccessibilityService {
 	    if (event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
 	        Notification not = (Notification) event.getParcelableData();
 		
-	        Log.d("Notification: ", "new post");	
+	        	
 			// permissions
 			boolean send_other_notifications = sharedPrefs.getBoolean("send_other_notifications", false);
 			ArrayList<String> whitelist = getNotificationWhitelist();
 			String packagename = String.valueOf(event.getPackageName());
 			
 			if (send_other_notifications && whitelist.contains(packagename)) {
-				
-				String text =not.tickerText.toString();	
-				startUpdateServiceCommand(text);
+				Log.d("Notification: ", "new post");
+				if (not.tickerText.toString() != null) {
+					String text = not.tickerText.toString();
+					startUpdateServiceCommand(text);
+				}
 			}
 	    }
 	}
