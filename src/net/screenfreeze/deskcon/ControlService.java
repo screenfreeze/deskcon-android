@@ -16,7 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,10 +26,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
@@ -58,31 +60,46 @@ public class ControlService extends Service {
 	@Override
 	public void onDestroy() {
 		Log.d("Control: ", "stop Server");	
-		controlserver.cancel(true);
+		//controlserver.cancel(true);
 		controlserver.stopServer();
 		super.onDestroy();
 	}
+	
+	// workaround: sys stops task when UI closes
+	@SuppressLint("NewApi")
+	@Override
+	public void onTaskRemoved(Intent rootIntent){
+	    Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+	    restartServiceIntent.setPackage(getPackageName());
+
+	    PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+	    AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+	    alarmService.set(
+	    AlarmManager.ELAPSED_REALTIME,
+	    SystemClock.elapsedRealtime() + 1000,
+	    restartServicePendingIntent);
+
+	    super.onTaskRemoved(rootIntent);
+	 }
 
 	@SuppressLint("NewApi")
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {       
-		controlserver = new ControlServer();		
+		controlserver = new ControlServer();
 		
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
-		    controlserver.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-		} else {
-		    controlserver.execute();
-		}
-		
+	    Thread cs = new Thread(controlserver);
+	    cs.start();
+
 		return START_STICKY;
 	}	
 	
-	private class ControlServer extends AsyncTask<Void, Integer, Void> {
+	private class ControlServer implements Runnable {
 		private SSLServerSocket sslServerSocket;
 		private SSLSocket socket;
+		private boolean isStopped = false;
 
 		@Override
-		protected Void doInBackground(Void... params) {
+		public void run() {
 			Log.d("Control: ", "start Server");	
 			try {		
 				// create SSLServerSocket
@@ -93,11 +110,12 @@ public class ControlService extends Service {
 			} 
 			
 			//begin serving
-			while (!isCancelled()) {
+			while (!isStopped) {
 				try {
 					socket = (SSLSocket) sslServerSocket.accept();
 					socket.startHandshake();
-				} catch (IOException e) {					
+				} catch (IOException e) {
+					e.printStackTrace();
 				}	
 				if (socket != null && socket.isConnected()) {					
 					try {
@@ -107,9 +125,7 @@ public class ControlService extends Service {
 						e.printStackTrace();
 					}					
 				}
-			}
-
-			return null;
+			}			
 		}
 		
 		private void handleClientSocket(SSLSocket socket) throws Exception {		
@@ -149,28 +165,26 @@ public class ControlService extends Service {
 				publishProgress(1);				
 			}
 		}
+
+		private void publishProgress(int i) {
+			Looper.prepare();		
+			Toast finishedToast = Toast.makeText(getBaseContext(), 
+					"received File(s)", Toast.LENGTH_LONG);			
+
+			
+			finishedToast.show();			
+		}
 		
 		// force server stop
 		private void stopServer() {
+			isStopped = true;
 			try {
 				sslServerSocket.close();
 			} catch (IOException e) {}
 		}
-
-
-		protected void onProgressUpdate(Integer...state) {
-			if (state[0] == 1) {
-				Toast finishedToast = Toast.makeText(getBaseContext(), 
-						"received File(s)", Toast.LENGTH_LONG);
-				finishedToast.show();
-			}
-			
-			super.onProgressUpdate(state);
-		}
-
-
+		
 	}
-	
+
 	//stores sent sms in sent folder
 	public boolean storeSMS(String number, String message) {
 	    boolean ret = false;
