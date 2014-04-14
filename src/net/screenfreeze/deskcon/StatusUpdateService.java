@@ -90,18 +90,22 @@ public class StatusUpdateService extends Service {
 		}
 		
 		Bundle extras = intent.getExtras();
-		
+
 		if (extras == null || !extras.containsKey("commandtype")) {
+			System.out.println("sendsu");
 			sendStatusUpdate();
 		}
 		else {
-			SendDataClient dataclient = new SendDataClient();			
-			//exe in parallel
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			    dataclient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, extras);
-			} else {
-			    dataclient.execute(extras);
-			}			
+//			SendDataClient dataclient = new SendDataClient();			
+//			//exe in parallel
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//			    dataclient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, extras);
+//			} else {
+//			    dataclient.execute(extras);
+//			}
+			SendDataThread datathread = new SendDataThread(extras);
+		    Thread dt = new Thread(datathread);
+		    dt.start();
 		}
 				
 		return super.onStartCommand(intent, flags, startId); 
@@ -113,14 +117,18 @@ public class StatusUpdateService extends Service {
 		Bundle data = new Bundle();
 		data.putString("commandtype", "STATS");
 		data.putString("message", jsonstr);
-		SendDataClient dataclient = new SendDataClient();
+//		SendDataClient dataclient = new SendDataClient();
+//		
+//		//exe in parallel
+//		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
+//		    dataclient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, data);
+//		} else {
+//		    dataclient.execute(data);
+//		}
 		
-		//exe in parallel
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
-		    dataclient.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, data);
-		} else {
-		    dataclient.execute(data);
-		}
+		SendDataThread datathread = new SendDataThread(data);
+	    Thread dt = new Thread(datathread);
+	    dt.start();
 	}
 
 	// Building Protocol MSG
@@ -298,6 +306,68 @@ public class StatusUpdateService extends Service {
 	    return (context.getResources().getConfiguration().screenLayout
             & Configuration.SCREENLAYOUT_SIZE_MASK)
             >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+	}
+	
+	private class SendDataThread implements Runnable {
+		private String type;
+		private String message;
+		private Bundle data;
+		
+		public SendDataThread(Bundle data) {
+			type = data.getString("commandtype");
+			message = data.getString("message");	
+			this.data = data;
+		}
+
+		@SuppressLint("Wakelock")
+		@Override
+		public void run() {
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Status Update WL");
+			wl.acquire();
+			
+			if (data.containsKey("host")) {
+				// send only to one Host
+				String HOST = data.getString("host");
+				int PORT = data.getInt("port");
+				
+				try {
+					sendData(HOST, PORT);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				//send to all Hosts
+				for (int i=0; i<HOSTS.length; i++) {
+					try {
+						sendData(HOSTS[i], PORTS[i]);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}				
+				}
+			}
+			
+			wl.release();			
+		}
+		
+		private void sendData(String host, int port) throws Exception {
+			Socket sslsocket = null;
+			try {
+				// create SSl Connection
+				sslsocket = Connection.createSSLSocket(getApplicationContext(), host, port);
+			} catch (Exception e) {
+				Log.d("Connection: ", "could not connect");
+				return;
+			}
+		    
+			// write data
+			OutputStream out = sslsocket.getOutputStream();
+			String data = buildmsg(type, message);
+			out.write(data.getBytes());
+			sslsocket.close();
+	    }	
+		
 	}
 	
 	private class SendDataClient extends AsyncTask<Bundle, Void, Void> {
