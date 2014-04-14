@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -26,8 +27,7 @@ public class NotificationUpdateService extends NotificationListenerService{
 	}
 
 	@Override
-	public void onNotificationPosted(StatusBarNotification not) {
-		Log.d("Notification: ", "new post");	
+	public void onNotificationPosted(StatusBarNotification not) {		
 		
 		// permissions
 		boolean send_other_notifications = sharedPrefs.getBoolean("send_other_notifications", false);
@@ -35,8 +35,11 @@ public class NotificationUpdateService extends NotificationListenerService{
 		String packagename = not.getPackageName();
 		
 		if (send_other_notifications && whitelist.contains(packagename)) {
+			Log.d("Notification: ", "new post");
+			Notification notification = not.getNotification();
+
 			String text = getAppnameFromPackagename(packagename) + " " +
-					not.getNotification().tickerText.toString();
+					notification.tickerText.toString();
 			startUpdateServiceCommand(text);	
 		}	
 	}
