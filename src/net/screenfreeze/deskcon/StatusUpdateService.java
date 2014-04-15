@@ -370,6 +370,7 @@ public class StatusUpdateService extends Service {
 		
 	}
 	
+	//old code
 	private class SendDataClient extends AsyncTask<Bundle, Void, Void> {
 		private String type;
 		private String message;
