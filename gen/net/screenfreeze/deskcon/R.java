@@ -8,6 +8,9 @@
 package net.screenfreeze.deskcon;
 
 public final class R {
+    public static final class array {
+        public static final int playerarray=0x7f080000;
+    }
     public static final class attr {
     }
     public static final class bool {
@@ -25,44 +28,66 @@ public final class R {
         public static final int activity_vertical_margin=0x7f070001;
     }
     public static final class drawable {
-        public static final int connector_launcher=0x7f020000;
+        public static final int appwidget_bg=0x7f020000;
+        public static final int appwidget_bg_clickable=0x7f020001;
+        public static final int appwidget_bg_focused=0x7f020002;
+        public static final int appwidget_bg_pressed=0x7f020003;
+        public static final int appwidget_button_center=0x7f020004;
+        public static final int appwidget_button_left=0x7f020005;
+        public static final int appwidget_button_right=0x7f020006;
+        public static final int appwidget_dark_bg=0x7f020007;
+        public static final int appwidget_dark_bg_clickable=0x7f020008;
+        public static final int appwidget_dark_bg_focused=0x7f020009;
+        public static final int appwidget_dark_bg_pressed=0x7f02000a;
+        public static final int appwidget_inner_focused_c=0x7f02000b;
+        public static final int appwidget_inner_focused_l=0x7f02000c;
+        public static final int appwidget_inner_focused_r=0x7f02000d;
+        public static final int appwidget_inner_pressed_c=0x7f02000e;
+        public static final int appwidget_inner_pressed_l=0x7f02000f;
+        public static final int appwidget_inner_pressed_r=0x7f020010;
+        public static final int connector_launcher=0x7f020011;
     }
     public static final class id {
-        public static final int action_settings=0x7f0b0022;
-        public static final int app_icon=0x7f0b0009;
-        public static final int app_name=0x7f0b000a;
-        public static final int app_package=0x7f0b000b;
-        public static final int applistview=0x7f0b001d;
-        public static final int changelogView=0x7f0b0002;
-        public static final int checkBox=0x7f0b000c;
-        public static final int deletehostimageView=0x7f0b0016;
-        public static final int hostidtextView=0x7f0b0015;
-        public static final int hostiptextView=0x7f0b0011;
-        public static final int hostmactextView=0x7f0b0003;
-        public static final int hostnametextView=0x7f0b0001;
-        public static final int hosts_cancel_button=0x7f0b001b;
-        public static final int hosts_editText=0x7f0b0019;
-        public static final int hosts_save_button=0x7f0b001c;
-        public static final int hostsaddimageView=0x7f0b000e;
-        public static final int hostslistView=0x7f0b000f;
-        public static final int layout_root=0x7f0b0000;
-        public static final int linearLayout1=0x7f0b0010;
-        public static final int linearLayout2=0x7f0b0012;
-        public static final int linearLayout3=0x7f0b0013;
-        public static final int myfptextView=0x7f0b0014;
-        public static final int newipeditText=0x7f0b0005;
-        public static final int newporteditText=0x7f0b0007;
-        public static final int ping_button=0x7f0b001a;
-        public static final int scrollView1=0x7f0b000d;
-        public static final int serverfptextView=0x7f0b0020;
-        public static final int sharehostslistView=0x7f0b001e;
-        public static final int ssid_spinner=0x7f0b0018;
-        public static final int textView1=0x7f0b0004;
-        public static final int textView2=0x7f0b0006;
-        public static final int textView3=0x7f0b001f;
-        public static final int textView4=0x7f0b0021;
-        public static final int wifilockcheckBox=0x7f0b0008;
-        public static final int wifitextView=0x7f0b0017;
+        public static final int NextButton=0x7f0c001a;
+        public static final int PlayButton=0x7f0c0019;
+        public static final int PrevButton=0x7f0c0018;
+        public static final int action_settings=0x7f0c0027;
+        public static final int app_icon=0x7f0c0009;
+        public static final int app_name=0x7f0c000a;
+        public static final int app_package=0x7f0c000b;
+        public static final int applistview=0x7f0c0020;
+        public static final int changelogView=0x7f0c0002;
+        public static final int checkBox=0x7f0c000c;
+        public static final int deletehostimageView=0x7f0c0015;
+        public static final int hostidtextView=0x7f0c0014;
+        public static final int hostiptextView=0x7f0c0011;
+        public static final int hostmactextView=0x7f0c0003;
+        public static final int hostnametextView=0x7f0c0001;
+        public static final int hosts_cancel_button=0x7f0c001e;
+        public static final int hosts_editText=0x7f0c001c;
+        public static final int hosts_save_button=0x7f0c001f;
+        public static final int hostsaddimageView=0x7f0c000e;
+        public static final int hostslistView=0x7f0c000f;
+        public static final int layout_root=0x7f0c0000;
+        public static final int linearLayout1=0x7f0c0010;
+        public static final int linearLayout3=0x7f0c0012;
+        public static final int myfptextView=0x7f0c0013;
+        public static final int newipeditText=0x7f0c0005;
+        public static final int newporteditText=0x7f0c0007;
+        public static final int ping_button=0x7f0c001d;
+        public static final int playerspinner=0x7f0c0025;
+        public static final int scrollView1=0x7f0c000d;
+        public static final int serverfptextView=0x7f0c0023;
+        public static final int sharehostslistView=0x7f0c0021;
+        public static final int ssid_spinner=0x7f0c001b;
+        public static final int textView1=0x7f0c0017;
+        public static final int textView3=0x7f0c0022;
+        public static final int textView4=0x7f0c0024;
+        public static final int widgethostslistView=0x7f0c0026;
+        public static final int widgethosttextView=0x7f0c0004;
+        public static final int widgetplayertextView=0x7f0c0006;
+        public static final int wifilockcheckBox=0x7f0c0008;
+        public static final int wifitextView=0x7f0c0016;
     }
     public static final class layout {
         public static final int about=0x7f030000;
@@ -72,21 +97,24 @@ public final class R {
         public static final int desktop_hosts=0x7f030004;
         public static final int edit_host_dialog=0x7f030005;
         public static final int host_list_row=0x7f030006;
-        public static final int network_conf_layout=0x7f030007;
-        public static final int notification_whitelist=0x7f030008;
-        public static final int share_desktop_hosts=0x7f030009;
-        public static final int verify_fingerprint_dialog=0x7f03000a;
+        public static final int host_list_row_share=0x7f030007;
+        public static final int media_widget=0x7f030008;
+        public static final int network_conf_layout=0x7f030009;
+        public static final int notification_whitelist=0x7f03000a;
+        public static final int share_desktop_hosts=0x7f03000b;
+        public static final int verify_fingerprint_dialog=0x7f03000c;
+        public static final int widget_conf_layout=0x7f03000d;
     }
     public static final class menu {
-        public static final int main=0x7f0a0000;
+        public static final int main=0x7f0b0000;
     }
     public static final class raw {
         public static final int defaultkeystore=0x7f050000;
         public static final int defaultnotificationwl=0x7f050001;
     }
     public static final class string {
-        public static final int action_settings=0x7f080001;
-        public static final int app_name=0x7f080000;
+        public static final int action_settings=0x7f090001;
+        public static final int app_name=0x7f090000;
     }
     public static final class style {
         /** 
@@ -110,13 +138,21 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f090000;
+        public static final int AppBaseTheme=0x7f0a0000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f090001;
+        public static final int AppTheme=0x7f0a0001;
+        /**  Widget theme. 
+ All customizations that are NOT specific to a particular API-level can go here. 
+ Widget theme. 
+ All customizations that are NOT specific to a particular API-level can go here. 
+         */
+        public static final int WidgetButtonTheme=0x7f0a0002;
     }
     public static final class xml {
-        public static final int preferences=0x7f040000;
+        public static final int mediawidgetinfo=0x7f040000;
+        public static final int preferences=0x7f040001;
+        public static final int widget_preferences=0x7f040002;
     }
 }
