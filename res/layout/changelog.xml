@@ -20,7 +20,10 @@
                 android:id="@+id/changelogView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Release 0.2.8\n
+                android:text="Release 0.2.9\n
+							    fixed Notification Access Button\n
+							    
+                			\nRelease 0.2.8\n
 							    fixed NotificationListener\n
 							    fixed Controlserver\n
 							    no Telephony required\n
