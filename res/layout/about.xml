@@ -17,7 +17,7 @@
         android:id="@+id/changelogView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ver. 0.2.9"
+        android:text="Ver. 0.2.9.1"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView

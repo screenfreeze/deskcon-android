@@ -20,7 +20,9 @@
                 android:id="@+id/changelogView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Release 0.2.9\n
+                android:text="Release 0.2.9.1\n
+                				fixed Media Widget Configuration
+                				fixed Notification FC on 4.4.3
 							    fixed Notification Access Button\n
 							    
                 			\nRelease 0.2.8\n

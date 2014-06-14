@@ -107,6 +107,7 @@ public class ControlService extends Service {
 			} catch (Exception e) {
 				e.printStackTrace();
 				Log.d("Control: ", "could not start");	
+				return;
 			} 
 			
 			//begin serving

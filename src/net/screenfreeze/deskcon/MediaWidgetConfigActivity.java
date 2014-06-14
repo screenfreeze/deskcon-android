@@ -140,15 +140,13 @@ public class MediaWidgetConfigActivity extends Activity {
 		public void bindView(View view, final Context context, Cursor cursor) {
 			TextView idtv = (TextView) view.findViewById(R.id.hostidtextView);
 			TextView nametv = (TextView) view.findViewById(R.id.hostnametextView);
-			TextView iptv = (TextView) view.findViewById(R.id.hostiptextView);
-			TextView mactv = (TextView) view.findViewById(R.id.hostmactextView);
+			TextView iptv = (TextView) view.findViewById(R.id.hostiptextView);			
 			TextView wifitv = (TextView) view.findViewById(R.id.wifitextView);
 			final long id = cursor.getLong(0);
 			
 			nametv.setText(cursor.getString(1));
 			idtv.setText(String.valueOf(id));
 			iptv.setText(cursor.getString(2));
-			mactv.setText(cursor.getString(4));
 			wifitv.setText(cursor.getString(6));					
 		}
 		

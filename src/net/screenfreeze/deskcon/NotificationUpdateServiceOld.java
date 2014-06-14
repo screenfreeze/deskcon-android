@@ -33,8 +33,9 @@ public class NotificationUpdateServiceOld extends AccessibilityService {
 			ArrayList<String> whitelist = getNotificationWhitelist();
 			String packagename = String.valueOf(event.getPackageName());
 			
-			if (send_other_notifications && whitelist.contains(packagename)) {
+			if (not != null && send_other_notifications && whitelist.contains(packagename)) {
 				Log.d("Notification: ", "new post");
+
 				if (not.tickerText.toString() != null) {
 					String text = not.tickerText.toString();
 					startUpdateServiceCommand(text);
