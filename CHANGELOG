@@ -1,3 +1,9 @@
+Release 0.3
+	fixed Null status values
+	one device on multiple networks
+	improved Hostname support
+	added discovery service
+	
 Release 0.2.9.1
     fixed Media Widget Configuration
     fixed Notification FC on 4.4.3

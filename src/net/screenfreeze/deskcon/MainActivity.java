@@ -51,6 +51,7 @@ public class MainActivity extends PreferenceActivity {
 	private static Editor sharedPrefsEditor;
 	private static Intent statusUpdateServiceIntent;
 	private static Intent controlServiceIntent;
+	private static Intent discoveryServiceIntent;
 	
 	
     @SuppressLint("CommitPrefEdits")
@@ -66,6 +67,7 @@ public class MainActivity extends PreferenceActivity {
 		statusUpdateServiceIntent = new Intent(this, StatusUpdateService.class);
 		statusUpdateServicePIntent = PendingIntent.getService(this, 0, statusUpdateServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		controlServiceIntent = new Intent(this, ControlService.class);
+		discoveryServiceIntent = new Intent(this, DiscoveryService.class);
 		
         Preference desktophostsnewpref = findPreference("desktophosts");
         Preference notificationaccesspref = findPreference("notification_access");
@@ -184,7 +186,9 @@ public class MainActivity extends PreferenceActivity {
 			int secs = min * 60;
 			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 
 					secs*1000, statusUpdateServicePIntent);	
-    	}    	
+    	}    
+    	
+    	//startService(discoveryServiceIntent);
     }
     
     // Actions if a Preference changes

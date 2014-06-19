@@ -91,6 +91,7 @@ public class DesktopHostsActivity extends Activity {
 				String host = cursor.getString(2);
 				int port = cursor.getInt(3);
 				cursor.close();
+				
 				Intent i = new Intent(getApplicationContext(), StatusUpdateService.class);
 	    		i.putExtra("commandtype", "PING");
 	    		i.putExtra("message", "");
@@ -254,7 +255,7 @@ public class DesktopHostsActivity extends Activity {
 			final long id = cursor.getLong(0);
 			
 			nametv.setText(cursor.getString(1));
-			idtv.setText(String.valueOf(id));
+			idtv.setText(String.valueOf(cursor.getLong(4)));
 			iptv.setText(cursor.getString(2));
 			wifitv.setText(cursor.getString(6));
 					

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.screenfreeze.deskcon"
-    android:versionCode="8"
-    android:versionName="0.2.9.1" >
+    android:versionCode="10"
+    android:versionName="0.3" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -80,6 +82,8 @@
         <service android:name=".SendFilesService" />
         <service android:name=".ControlService"
             android:process=":controlprocess" />
+        <service android:name=".DiscoveryService"
+            android:process=":discoveryprocess" />
         <service android:name=".NotificationUpdateService"            
             android:enabled="false"
           	android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">

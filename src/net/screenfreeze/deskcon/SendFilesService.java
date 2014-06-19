@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 
 import javax.net.ssl.SSLSocket;
 
@@ -165,6 +166,7 @@ public class SendFilesService extends Service {
 	        
 			SSLSocket sslsocket;
 			try {
+				HOST = InetAddress.getByName(HOST).getHostAddress();
 				// create SSL Connection
 				sslsocket = Connection.createSSLSocket(getApplicationContext(), HOST, PORT);
 			} catch (Exception e) {

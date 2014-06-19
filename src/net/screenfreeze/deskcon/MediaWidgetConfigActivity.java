@@ -142,10 +142,9 @@ public class MediaWidgetConfigActivity extends Activity {
 			TextView nametv = (TextView) view.findViewById(R.id.hostnametextView);
 			TextView iptv = (TextView) view.findViewById(R.id.hostiptextView);			
 			TextView wifitv = (TextView) view.findViewById(R.id.wifitextView);
-			final long id = cursor.getLong(0);
 			
 			nametv.setText(cursor.getString(1));
-			idtv.setText(String.valueOf(id));
+			idtv.setText(String.valueOf(cursor.getLong(4)));
 			iptv.setText(cursor.getString(2));
 			wifitv.setText(cursor.getString(6));					
 		}

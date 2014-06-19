@@ -10,7 +10,7 @@ import android.util.Log;
 public class DesktopHostsDBHelper extends SQLiteOpenHelper {
 
 	// Database Version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     // Database Name
     private static final String DATABASE_NAME = "hosts.db";
     
@@ -21,7 +21,7 @@ public class DesktopHostsDBHelper extends SQLiteOpenHelper {
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_IP = "ip";
     private static final String COLUMN_PORT = "port";
-    private static final String COLUMN_MAC = "mac";
+    private static final String COLUMN_UUID = "uuid";
     private static final String COLUMN_WIFI = "wifi";
     private static final String COLUMN_FINGERPRINT = "fingerprint";
     
@@ -34,11 +34,11 @@ public class DesktopHostsDBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
         // SQL statement to create book table
         String CREATE_BOOK_TABLE = "CREATE TABLE desktophosts ( " +
-                COLUMN_ID+" INTEGER PRIMARY KEY, " + 
+                COLUMN_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " + 
                 COLUMN_NAME+" TEXT, "+
                 COLUMN_IP+" TEXT NOT NULL, "+
                 COLUMN_PORT+" INTEGER NOT NULL, "+
-                COLUMN_MAC+" TEXT, "+
+                COLUMN_UUID+" INTEGER NOT NULL, "+
                 COLUMN_FINGERPRINT+" VARCHAR, "+
                 COLUMN_WIFI+" TEXT )";
  
@@ -48,21 +48,21 @@ public class DesktopHostsDBHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newversion) {
-        // Drop older books table if existed
-        db.execSQL("DROP TABLE IF EXISTS books");
+        // Drop older table if existed
+        db.execSQL("DROP TABLE IF EXISTS desktophosts");
  
-        // create fresh books table
+        // create fresh table
         this.onCreate(db);
 	}
 	
-	public void addHost(long id, String name, String ip, int port, 
+	public void addHost(long uuid, String name, String ip, int port, 
 			String wifi, String mac, String fingerprint) {
 		SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         
-        values.put(COLUMN_ID, id);
+        //values.put(COLUMN_ID, id);
         values.put(COLUMN_NAME, name);
-        values.put(COLUMN_MAC, mac);
+        values.put(COLUMN_UUID, uuid);
         values.put(COLUMN_IP, ip);
         values.put(COLUMN_PORT, port);
         values.put(COLUMN_WIFI, wifi);

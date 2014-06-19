@@ -36,7 +36,7 @@ public class NotificationUpdateServiceOld extends AccessibilityService {
 			if (not != null && send_other_notifications && whitelist.contains(packagename)) {
 				Log.d("Notification: ", "new post");
 
-				if (not.tickerText.toString() != null) {
+				if (not.tickerText != null) {
 					String text = not.tickerText.toString();
 					startUpdateServiceCommand(text);
 				}

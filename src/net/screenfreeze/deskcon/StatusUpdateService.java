@@ -1,6 +1,7 @@
 package net.screenfreeze.deskcon;
 
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 
 import org.json.JSONException;
@@ -92,10 +93,10 @@ public class StatusUpdateService extends Service {
 		Bundle extras = intent.getExtras();
 
 		if (extras == null || !extras.containsKey("commandtype")) {
-			System.out.println("sendsu");
 			sendStatusUpdate();
 		}
 		else {
+			sendStatusUpdate();
 //			SendDataClient dataclient = new SendDataClient();			
 //			//exe in parallel
 //			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -418,6 +419,7 @@ public class StatusUpdateService extends Service {
 		private void sendData(String host, int port) throws Exception {
 			Socket sslsocket = null;
 			try {
+				host = InetAddress.getByName(host).getHostAddress();
 				// create SSl Connection
 				sslsocket = Connection.createSSLSocket(getApplicationContext(), host, port);
 			} catch (Exception e) {

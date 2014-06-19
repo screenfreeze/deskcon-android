@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -140,7 +141,8 @@ public class AuthenticationManager {
 			
 			try {
 				try {
-					clientSocket = new Socket(Host, Port);
+					String HostAddress = InetAddress.getByName(Host).getHostAddress();
+					clientSocket = new Socket(HostAddress, Port);
 				}
 				catch (Exception e) {
 					ConnectionError.show();
