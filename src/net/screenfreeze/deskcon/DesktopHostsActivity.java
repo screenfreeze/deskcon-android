@@ -1,5 +1,16 @@
 package net.screenfreeze.deskcon;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Formatter;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -9,7 +20,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
@@ -29,6 +44,7 @@ public class DesktopHostsActivity extends Activity {
 	private DesktopHostsDBHelper dbhelper;
 	private AuthenticationManager authenticationmanager;
 	private ListView hostslistview;
+	private static DiscoveryTask responseserver;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -59,8 +75,6 @@ public class DesktopHostsActivity extends Activity {
 		dbhelper.close();
 		super.onDestroy();
 	}
-
-
 
 	private void loadHostlist() {
 		hostslistview.removeAllViewsInLayout();
@@ -126,14 +140,41 @@ public class DesktopHostsActivity extends Activity {
 		
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 		alertDialogBuilder.setView(addhostView);
-		alertDialogBuilder.setTitle("Pair with Desktop");
+		alertDialogBuilder.setTitle("Pair with Desktop");		
+		
 		
 		alertDialogBuilder.setCancelable(true);
 		final EditText ipedittext = (EditText) addhostView.findViewById(R.id.newipeditText);
 		final EditText portedittext = (EditText) addhostView.findViewById(R.id.newporteditText);
 		final CheckBox wifilockcheckbox = (CheckBox) addhostView.findViewById(R.id.wifilockcheckBox);
+		ListView foundHostsListView = (ListView) addhostView.findViewById(R.id.foundlistView);
+		ArrayList<DesktopHost> as = new ArrayList<DesktopHost>();
+		
+		//as.add(new DesktopHost("Hans", "192.168.55.66", 34553, 51674));
+		final DiscoveredHostsAdapter dha = new DiscoveredHostsAdapter(getApplicationContext(), as);
+		
+		responseserver = new DiscoveryTask(dha);
+		
 		final String wifi = getWifiSSID();
 		wifilockcheckbox.setText("only on "+wifi);		
+		
+		foundHostsListView.setAdapter(dha);
+		foundHostsListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				DesktopHost desk = dha.getItem(position);
+				
+	        	if (wifilockcheckbox.isChecked()) {
+	        		authenticationmanager.pairWithHost(desk.ip, desk.port, wifi, new OnPairCallback());
+	        	}
+	        	else {
+	        		authenticationmanager.pairWithHost(desk.ip, desk.port, "", new OnPairCallback());
+	        	}
+	        	responseserver.stopServer();
+			}
+		});
 		
 		alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {			
 			@Override
@@ -147,7 +188,8 @@ public class DesktopHostsActivity extends Activity {
 	        	else {
 	        		authenticationmanager.pairWithHost(ip, port, "", new OnPairCallback());
 	        	}
-				
+	        	
+	        	responseserver.cancel(true);
 				dialog.cancel();					
 			}
 		});
@@ -156,11 +198,15 @@ public class DesktopHostsActivity extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				responseserver.stopServer();
 				dialog.cancel();				
 			}
-		});
+		});	
+		
+	    responseserver.execute();
+		
 		AlertDialog alertDialog = alertDialogBuilder.create();
-		alertDialog.show();
+		alertDialog.show();		
 	}
 	
 	// Edit a Host
@@ -238,6 +284,130 @@ public class DesktopHostsActivity extends Activity {
         return ssid;    	
     }
     
+    public class DiscoveredHostsAdapter extends ArrayAdapter<DesktopHost> {
+
+		public DiscoveredHostsAdapter(Context context, 
+				ArrayList<DesktopHost> objects) {
+			super(context,R.layout.host_list_row_share,objects);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			DesktopHost desktop = getItem(position);
+			
+	        if (convertView == null) {
+	           convertView = LayoutInflater.from(getContext()).inflate(R.layout.host_list_row_share, parent, false);
+	        }
+	        // Lookup view for data population
+	        TextView tvName = (TextView) convertView.findViewById(R.id.hostnametextView);
+	        TextView tvip = (TextView) convertView.findViewById(R.id.hostiptextView);
+	        TextView tvid = (TextView) convertView.findViewById(R.id.hostidtextView);
+	        TextView tvwifi = (TextView) convertView.findViewById(R.id.wifitextView);
+	        // Populate the data into the template view using the data object
+	        tvName.setText(desktop.name);
+	        tvip.setText(desktop.ip);
+	        tvid.setText(""+desktop.uuid);
+	        tvwifi.setText("");
+			
+			return convertView;
+		}    	
+    }
+    
+    private class DiscoveryTask extends AsyncTask<Void, Void, Void> {
+		private DatagramSocket serverSocketUDP;
+		private boolean isStopped = false;
+		private DiscoveredHostsAdapter dha;
+
+		public DiscoveryTask(DiscoveredHostsAdapter dha) {
+			this.dha = dha;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			Log.d("Discovery: ", "start UDP Server");	
+			String data = "0::deskcon";
+			try {		
+				// Send "Ask for Hosts" Broadcast
+				serverSocketUDP = new DatagramSocket(5108); 
+				serverSocketUDP.setBroadcast(true);
+				
+				InetAddress local = getBroadcast();			
+				
+				// has a broadcast address been found
+				if (local == null) { 
+					Log.d("Discovery: ", "no Broadcast Address found");
+					return null; 
+				}
+				
+				DatagramPacket packet = new DatagramPacket(data.getBytes(), data.length(), local, 5108);
+				serverSocketUDP.send(packet);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				Log.d("Discovery: ", "could not start");	
+				return null;
+			} 
+			
+			WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+			MulticastLock lock = wifi.createMulticastLock("net.screenfreeze.deskcon");
+			lock.acquire();
+			
+			// Receive responses from desktop hosts
+			while (!isStopped) {
+				byte[] receiveData = new byte[128];
+				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+				
+				try {
+					serverSocketUDP.receive(receivePacket);
+				} catch (Exception e) {}
+				
+                final InetAddress address = receivePacket.getAddress();
+               
+                String msg = new String(receiveData, 0, receivePacket.getLength());
+				
+				// Check for valid msg
+				boolean isvalismsg = msg.split("::").length == 3;
+				
+				// Process msg if it is not our own broadcast msg
+				if (!msg.equals(data) && !isStopped && isvalismsg) {
+					
+					final DesktopHost desktop = handleReceiveUdp(msg, address);               
+	                Log.d("udp from: ", "msg "+msg+"  "+address);
+	                
+	                runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {
+							dha.add(desktop);
+						}
+					});   
+				}    
+			}
+			lock.release();
+			
+			return null;
+		}
+		
+		private DesktopHost handleReceiveUdp(String msg, InetAddress address) {
+			String[] split = msg.split("::");
+			long uuid = Long.parseLong(split[0]);
+			String hostname = split[1];
+			int port = Integer.parseInt(split[2]);
+			
+			return new DesktopHost(hostname, ""+address.getHostAddress(), port, uuid);
+		}
+		
+		// force server stop
+		private void stopServer() {
+			isStopped = true;
+			try {
+				serverSocketUDP.close();
+			}
+			catch (Exception e) {}
+		}
+    	
+    }
+
     public class HostsAdapter extends CursorAdapter {
 
 		@SuppressWarnings("deprecation")
@@ -316,4 +486,60 @@ public class DesktopHostsActivity extends Activity {
             loadHostlist();
         }
     }
+    
+    public class DesktopHost {
+        public String name;
+        public String ip;
+        public int port;
+        public long uuid;
+
+        public DesktopHost(String name, String ip, int port, long uuid) {
+           this.name = name;
+           this.ip = ip;
+           this.port = port;
+           this.uuid = uuid;
+        }    	
+    }
+    
+    public static InetAddress getBroadcast(){
+    InetAddress found_bcast_address=null;
+     System.setProperty("java.net.preferIPv4Stack", "true"); 
+        try
+        {
+          Enumeration<NetworkInterface> niEnum = NetworkInterface.getNetworkInterfaces();
+          while (niEnum.hasMoreElements())
+          {
+            NetworkInterface ni = niEnum.nextElement();
+            if(!ni.isLoopback()){
+                for (InterfaceAddress interfaceAddress : ni.getInterfaceAddresses())
+                {
+                  found_bcast_address = interfaceAddress.getBroadcast();               
+                }
+            }
+          }
+        }
+        catch (SocketException e)
+        {
+          e.printStackTrace();
+        }
+
+        return found_bcast_address;
+    }
+    
+    public InetAddress getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        return inetAddress;
+                    }
+                }
+            }
+        } catch (SocketException ex) {}
+        return null;
+    }
 }
+
+

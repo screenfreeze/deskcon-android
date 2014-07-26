@@ -212,7 +212,7 @@ public class AuthenticationManager {
 		@Override
 		protected void onPreExecute() {
 			progressDialog = new ProgressDialog(context);
-			progressDialog.setMessage("Connectin to Desktop Host...");
+			progressDialog.setMessage("Connecting to Desktop Host...");
 			progressDialog.show();
 			super.onPreExecute();
 		}

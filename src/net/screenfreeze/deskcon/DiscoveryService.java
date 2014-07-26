@@ -111,7 +111,8 @@ public class DiscoveryService extends Service {
                 InetAddress address = receivePacket.getAddress();
                 String msg = new String(receiveData, 0, receivePacket.getLength());
                 
-                Log.d("udp from: ", "msg "+msg+"  "+address);	
+                
+                Log.d("udp from: ", "msg "+msg+"  "+address);
                 
                 handleReceiveUdp(msg);
 			}

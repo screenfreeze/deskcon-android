@@ -21,13 +21,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Release 0.3\n
-								fixed Null status values\n
-								one device on multiple networks\n
-								improved Hostname support\n
+							    fixed Null status values\n
+							    one device on multiple networks\n
+							    improved Hostname support\n
 							    
                 			\nRelease 0.2.9.2\n
-                				fixed Media Widget Configuration\n
-                				fixed Notification FC on 4.4.3\n
+							    fixed Media Widget Configuration\n
+							    fixed Notification FC on 4.4.3\n
 							    fixed Notification Access Button\n
 							    
                 			\nRelease 0.2.8\n
